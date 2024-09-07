@@ -1,70 +1,72 @@
-// Context API Docs: https://beta.reactjs.org/learn/passing-data-deeply-with-context
-
 import React, {
-  createContext, //
+  createContext,
   useContext,
   useEffect,
   useMemo,
   useState,
 } from 'react';
-import { checkUser } from '../auth';
-import { firebase } from '../client';
+import { signOut, checkUser, signInWithGoogle } from '../auth';
+import { clientCredentials } from '../client';
 
 const AuthContext = createContext();
 
-AuthContext.displayName = 'AuthContext'; // Context object accepts a displayName string property. React DevTools uses this string to determine what to display for the context. https://reactjs.org/docs/context.html#contextdisplayname
+AuthContext.displayName = 'AuthContext';
 
 const AuthProvider = (props) => {
   const [user, setUser] = useState(null);
-  const [oAuthUser, setOAuthUser] = useState(null);
-
-  // there are 3 states for the user:
-  // null = application initial state, not yet loaded
-  // false = user is not logged in, but the app has loaded
-  // an object/value = user is logged in
-
-  const updateUser = useMemo(
-    () => (uid) => checkUser(uid).then((gamerInfo) => {
-      setUser({ fbUser: oAuthUser, ...gamerInfo });
-    }),
-    [oAuthUser],
-  );
 
   useEffect(() => {
-    firebase.auth().onAuthStateChanged((fbUser) => {
-      if (fbUser) {
-        setOAuthUser(fbUser);
-        checkUser(fbUser.uid).then((gamerInfo) => {
-          let userObj = {};
-          if ('null' in gamerInfo) {
-            userObj = gamerInfo;
-          } else {
-            userObj = { fbUser, uid: fbUser.uid, ...gamerInfo };
-          }
-          setUser(userObj);
-        });
-      } else {
-        setOAuthUser(false);
-        setUser(false);
-      }
-    }); // creates a single global listener for auth state changed
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) {
+      setUser(JSON.parse(storedUser));
+    } else {
+      setUser(false);
+    }
   }, []);
 
+  const login = async (username, password, method) => {
+    try {
+      let loggedInUser;
+      if (method === 'username') {
+        loggedInUser = await fetch(`${clientCredentials.databaseURL}/login`, {
+          method: 'POST',
+          body: JSON.stringify({ username, password }),
+          headers: {
+            'Content-Type': 'application/json',
+            Accept: 'application/json',
+          },
+        }).then((resp) => resp.json());
+      } else if (method === 'google') {
+        const result = await signInWithGoogle();
+        const userInfo = await checkUser(result.user.uid);
+        loggedInUser = userInfo.user;
+      }
+      setUser(loggedInUser);
+      localStorage.setItem('user', JSON.stringify(loggedInUser));
+    } catch (error) {
+      console.error('Error logging in:', error);
+      throw error;
+    }
+  };
+
+  const logout = () => {
+    signOut();
+    setUser(false);
+    localStorage.removeItem('user');
+  };
+
   const value = useMemo(
-    // https://reactjs.org/docs/hooks-reference.html#usememo
     () => ({
       user,
-      updateUser,
-      userLoading: user === null || oAuthUser === null,
-      // as long as user === null, will be true
-      // As soon as the user value !== null, value will be false
+      userLoading: user === null,
+      login,
+      logout,
     }),
-    [user, oAuthUser, updateUser],
+    [user],
   );
 
   return <AuthContext.Provider value={value} {...props} />;
 };
-const AuthConsumer = AuthContext.Consumer;
 
 const useAuth = () => {
   const context = useContext(AuthContext);
@@ -75,4 +77,4 @@ const useAuth = () => {
   return context;
 };
 
-export { AuthProvider, useAuth, AuthConsumer };
+export { AuthProvider, useAuth };
