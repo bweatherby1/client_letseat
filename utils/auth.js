@@ -2,10 +2,10 @@ import firebase from 'firebase/app';
 import 'firebase/auth';
 import { clientCredentials } from './client';
 
-const checkUser = (username, password) => new Promise((resolve, reject) => {
+const checkUser = (uid, password) => new Promise((resolve, reject) => {
   fetch(`${clientCredentials.databaseURL}/checkuser`, {
     method: 'POST',
-    body: JSON.stringify({ username, password }),
+    body: JSON.stringify({ uid, password }),
     headers: {
       'Content-Type': 'application/json',
       Accept: 'application/json',
@@ -15,19 +15,17 @@ const checkUser = (username, password) => new Promise((resolve, reject) => {
     .catch(reject);
 });
 
-const generateUID = () => {
-  return Math.random().toString(16).substring(2, 15) + Math.random().toString(16).substring(2, 15);
-};
+const generateUID = () => Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
 
 const registerUser = (userInfo) => new Promise((resolve, reject) => {
   const uid = generateUID();
-  
-  fetch(clientCredentials.databaseURL.replace(/"/g, '') + '/register', {
+
+  fetch(`${clientCredentials.databaseURL.replace(/"/g, '')}/register`, {
     method: 'POST',
     body: JSON.stringify({
       name: userInfo.name,
-      uid: uid,
-      password: userInfo.password
+      uid,
+      password: userInfo.password,
     }),
     headers: {
       'Content-Type': 'application/json',
@@ -45,13 +43,10 @@ const registerUser = (userInfo) => new Promise((resolve, reject) => {
       resolve(data);
     })
     .catch(reject);
-});const signInWithGoogle = () => {
-  const provider = new firebase.auth.GoogleAuthProvider();
-  return firebase.auth().signInWithPopup(provider);
-};
+});
 
 const signInWithUsername = (username, password) => new Promise((resolve, reject) => {
-  fetch(`${clientCredentials.databaseURL}/checkuser`, {
+  fetch(`${clientCredentials.databaseURL.replace(/"/g, '')}/checkuser`, {
     method: 'POST',
     body: JSON.stringify({ username, password }),
     headers: {
@@ -59,15 +54,13 @@ const signInWithUsername = (username, password) => new Promise((resolve, reject)
       Accept: 'application/json',
     },
   })
-    .then((resp) => resp.json())
-    .then((data) => {
-      if (data.valid) {
-        localStorage.setItem('auth_token', data.token);
-        resolve(data);
-      } else {
-        reject(new Error('Invalid credentials'));
+    .then((resp) => {
+      if (!resp.ok) {
+        throw new Error('Invalid credentials');
       }
+      return resp.json();
     })
+    .then(resolve)
     .catch(reject);
 });
 
@@ -79,7 +72,6 @@ const signOut = () => {
 export {
   checkUser,
   registerUser,
-  signInWithGoogle,
   signInWithUsername,
   signOut,
 };

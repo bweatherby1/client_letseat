@@ -5,8 +5,7 @@ import React, {
   useMemo,
   useState,
 } from 'react';
-import { signOut, checkUser, signInWithGoogle } from '../auth';
-import { clientCredentials } from '../client';
+import { signOut, checkUser, signInWithUsername } from '../auth';
 
 const AuthContext = createContext();
 
@@ -28,17 +27,10 @@ const AuthProvider = (props) => {
     try {
       let loggedInUser;
       if (method === 'username') {
-        loggedInUser = await fetch(`${clientCredentials.databaseURL}/login`, {
-          method: 'POST',
-          body: JSON.stringify({ username, password }),
-          headers: {
-            'Content-Type': 'application/json',
-            Accept: 'application/json',
-          },
-        }).then((resp) => resp.json());
+        loggedInUser = await signInWithUsername(username, password);
       } else if (method === 'google') {
-        const result = await signInWithGoogle();
-        const userInfo = await checkUser(result.user.uid);
+        // Remove the signInWithGoogle function call as it's not defined
+        const userInfo = await checkUser(username);
         loggedInUser = userInfo.user;
       }
       setUser(loggedInUser);
@@ -48,7 +40,6 @@ const AuthProvider = (props) => {
       throw error;
     }
   };
-
   const logout = () => {
     signOut();
     setUser(false);
