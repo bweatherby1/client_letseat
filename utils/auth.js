@@ -2,10 +2,10 @@ import firebase from 'firebase/app';
 import 'firebase/auth';
 import { clientCredentials } from './client';
 
-const checkUser = (uid, password) => new Promise((resolve, reject) => {
+const checkUser = (userName, password) => new Promise((resolve, reject) => {
   fetch(`${clientCredentials.databaseURL}/checkuser`, {
     method: 'POST',
-    body: JSON.stringify({ uid, password }),
+    body: JSON.stringify({ userName, password }),
     headers: {
       'Content-Type': 'application/json',
       Accept: 'application/json',
@@ -15,17 +15,19 @@ const checkUser = (uid, password) => new Promise((resolve, reject) => {
     .catch(reject);
 });
 
-const generateUID = () => Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
-
 const registerUser = (userInfo) => new Promise((resolve, reject) => {
-  const uid = generateUID();
-
   fetch(`${clientCredentials.databaseURL.replace(/"/g, '')}/register`, {
     method: 'POST',
     body: JSON.stringify({
       name: userInfo.name,
-      uid,
+      userName: userInfo.userName,
       password: userInfo.password,
+      bio: userInfo.bio,
+      profilePicture: userInfo.profilePicture,
+      streetAddress: userInfo.streetAddress,
+      city: userInfo.city,
+      state: userInfo.state,
+      zipCode: userInfo.zipCode,
     }),
     headers: {
       'Content-Type': 'application/json',
@@ -45,10 +47,10 @@ const registerUser = (userInfo) => new Promise((resolve, reject) => {
     .catch(reject);
 });
 
-const signInWithUsername = (username, password) => new Promise((resolve, reject) => {
+const signInWithUsername = (userName, password) => new Promise((resolve, reject) => {
   fetch(`${clientCredentials.databaseURL.replace(/"/g, '')}/checkuser`, {
     method: 'POST',
-    body: JSON.stringify({ username, password }),
+    body: JSON.stringify({ userName, password }),
     headers: {
       'Content-Type': 'application/json',
       Accept: 'application/json',
