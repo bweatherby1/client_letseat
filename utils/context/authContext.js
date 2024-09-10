@@ -5,7 +5,7 @@ import React, {
   useMemo,
   useState,
 } from 'react';
-import { signOut, checkUser, signInWithUsername } from '../auth';
+import { signOut, signInWithUsername } from '../auth';
 
 const AuthContext = createContext();
 
@@ -23,16 +23,9 @@ const AuthProvider = (props) => {
     }
   }, []);
 
-  const login = async (username, password, method) => {
+  const login = async (userName, password) => {
     try {
-      let loggedInUser;
-      if (method === 'username') {
-        loggedInUser = await signInWithUsername(username, password);
-      } else if (method === 'google') {
-        // Remove the signInWithGoogle function call as it's not defined
-        const userInfo = await checkUser(username);
-        loggedInUser = userInfo.user;
-      }
+      const loggedInUser = await signInWithUsername(userName, password);
       setUser(loggedInUser);
       localStorage.setItem('user', JSON.stringify(loggedInUser));
     } catch (error) {
@@ -40,6 +33,7 @@ const AuthProvider = (props) => {
       throw error;
     }
   };
+
   const logout = () => {
     signOut();
     setUser(false);
