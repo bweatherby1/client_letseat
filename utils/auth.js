@@ -40,10 +40,7 @@ const registerUser = (userInfo) => new Promise((resolve, reject) => {
       }
       return resp.json();
     })
-    .then((data) => {
-      localStorage.setItem('auth_token', data.token);
-      resolve(data);
-    })
+    .then(resolve)
     .catch(reject);
 });
 

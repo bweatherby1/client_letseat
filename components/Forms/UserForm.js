@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { Form, Button } from 'react-bootstrap';
+import { Form, Button, InputGroup } from 'react-bootstrap';
 import PropTypes from 'prop-types';
+import { FaEye, FaEyeSlash } from 'react-icons/fa';
 
 function UserForm({ onSubmit, initialData = {} }) {
   const [formData, setFormData] = useState({
@@ -14,6 +15,7 @@ function UserForm({ onSubmit, initialData = {} }) {
     state: initialData.state || '',
     zip_code: initialData.zip_code || '',
   });
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -54,14 +56,22 @@ function UserForm({ onSubmit, initialData = {} }) {
       </Form.Group>
       <Form.Group className="mb-3">
         <Form.Label>Password</Form.Label>
-        <Form.Control
-          type="password"
-          name="password"
-          placeholder="Enter password"
-          value={formData.password}
-          onChange={handleChange}
-          required
-        />
+        <InputGroup>
+          <Form.Control
+            type={showPassword ? 'text' : 'password'}
+            name="password"
+            placeholder="Enter password"
+            value={formData.password}
+            onChange={handleChange}
+            required
+          />
+          <Button
+            variant="outline-secondary"
+            onClick={() => setShowPassword(!showPassword)}
+          >
+            {showPassword ? <FaEyeSlash /> : <FaEye />}
+          </Button>
+        </InputGroup>
       </Form.Group>
       <Form.Group className="mb-3">
         <Form.Label>Bio</Form.Label>
@@ -74,7 +84,7 @@ function UserForm({ onSubmit, initialData = {} }) {
         />
       </Form.Group>
       <Form.Group className="mb-3">
-        <Form.Label>Profile Picture URL</Form.Label>
+        <Form.Label>Profile Picture</Form.Label>
         <Form.Control
           type="text"
           name="profile_picture"
@@ -82,7 +92,23 @@ function UserForm({ onSubmit, initialData = {} }) {
           value={formData.profile_picture}
           onChange={handleChange}
         />
+        <Form.Text className="text-muted">Or upload an image:</Form.Text>
+        <Form.Control
+          type="file"
+          accept="image/*"
+          onChange={(e) => {
+            const file = e.target.files[0];
+            if (file) {
+              const reader = new FileReader();
+              reader.onloadend = () => {
+                setFormData((prev) => ({ ...prev, profile_picture: reader.result }));
+              };
+              reader.readAsDataURL(file);
+            }
+          }}
+        />
       </Form.Group>
+
       <Form.Group className="mb-3">
         <Form.Label>Street Address</Form.Label>
         <Form.Control
