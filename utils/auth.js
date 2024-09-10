@@ -20,15 +20,16 @@ const registerUser = (userInfo) => new Promise((resolve, reject) => {
     method: 'POST',
     body: JSON.stringify({
       name: userInfo.name,
-      userName: userInfo.userName,
+      user_name: userInfo.user_name,
       password: userInfo.password,
       bio: userInfo.bio,
-      profilePicture: userInfo.profilePicture,
-      streetAddress: userInfo.streetAddress,
+      profile_picture: userInfo.profile_picture,
+      street_address: userInfo.street_address,
       city: userInfo.city,
       state: userInfo.state,
-      zipCode: userInfo.zipCode,
+      zip_code: userInfo.zip_code,
     }),
+
     headers: {
       'Content-Type': 'application/json',
       Accept: 'application/json',
