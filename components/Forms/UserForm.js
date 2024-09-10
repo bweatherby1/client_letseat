@@ -3,12 +3,29 @@ import { Form, Button } from 'react-bootstrap';
 import PropTypes from 'prop-types';
 
 function UserForm({ onSubmit, initialData = {} }) {
-  const [name, setName] = useState(initialData.name || '');
-  const [password, setPassword] = useState('');
+  const [formData, setFormData] = useState({
+    name: initialData.name || '',
+    user_name: initialData.user_name || '',
+    password: '',
+    bio: initialData.bio || '',
+    profile_picture: initialData.profile_picture || '',
+    street_address: initialData.street_address || '',
+    city: initialData.city || '',
+    state: initialData.state || '',
+    zip_code: initialData.zip_code || '',
+  });
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prevData) => ({
+      ...prevData,
+      [name]: value,
+    }));
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSubmit({ name, password });
+    onSubmit(formData);
   };
 
   return (
@@ -17,9 +34,21 @@ function UserForm({ onSubmit, initialData = {} }) {
         <Form.Label>Name</Form.Label>
         <Form.Control
           type="text"
+          name="name"
           placeholder="Enter your name"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
+          value={formData.name}
+          onChange={handleChange}
+          required
+        />
+      </Form.Group>
+      <Form.Group className="mb-3">
+        <Form.Label>Username</Form.Label>
+        <Form.Control
+          type="text"
+          name="user_name"
+          placeholder="Enter username"
+          value={formData.user_name}
+          onChange={handleChange}
           required
         />
       </Form.Group>
@@ -27,9 +56,74 @@ function UserForm({ onSubmit, initialData = {} }) {
         <Form.Label>Password</Form.Label>
         <Form.Control
           type="password"
+          name="password"
           placeholder="Enter password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
+          value={formData.password}
+          onChange={handleChange}
+          required
+        />
+      </Form.Group>
+      <Form.Group className="mb-3">
+        <Form.Label>Bio</Form.Label>
+        <Form.Control
+          as="textarea"
+          name="bio"
+          placeholder="Enter your bio"
+          value={formData.bio}
+          onChange={handleChange}
+        />
+      </Form.Group>
+      <Form.Group className="mb-3">
+        <Form.Label>Profile Picture URL</Form.Label>
+        <Form.Control
+          type="text"
+          name="profile_picture"
+          placeholder="Enter profile picture URL"
+          value={formData.profile_picture}
+          onChange={handleChange}
+        />
+      </Form.Group>
+      <Form.Group className="mb-3">
+        <Form.Label>Street Address</Form.Label>
+        <Form.Control
+          type="text"
+          name="street_address"
+          placeholder="Enter street address"
+          value={formData.street_address}
+          onChange={handleChange}
+          required
+        />
+      </Form.Group>
+      <Form.Group className="mb-3">
+        <Form.Label>City</Form.Label>
+        <Form.Control
+          type="text"
+          name="city"
+          placeholder="Enter city"
+          value={formData.city}
+          onChange={handleChange}
+          required
+        />
+      </Form.Group>
+      <Form.Group className="mb-3">
+        <Form.Label>State</Form.Label>
+        <Form.Control
+          type="text"
+          name="state"
+          placeholder="Enter state"
+          value={formData.state}
+          onChange={handleChange}
+          required
+        />
+      </Form.Group>
+      <Form.Group className="mb-3">
+        <Form.Label>Zip Code</Form.Label>
+        <Form.Control
+          type="text"
+          name="zip_code"
+          placeholder="Enter zip code"
+          value={formData.zip_code}
+          onChange={handleChange}
           required
         />
       </Form.Group>
@@ -44,6 +138,13 @@ UserForm.propTypes = {
   onSubmit: PropTypes.func.isRequired,
   initialData: PropTypes.shape({
     name: PropTypes.string,
+    user_name: PropTypes.string,
+    bio: PropTypes.string,
+    profile_picture: PropTypes.string,
+    street_address: PropTypes.string,
+    city: PropTypes.string,
+    state: PropTypes.string,
+    zip_code: PropTypes.string,
   }),
 };
 
