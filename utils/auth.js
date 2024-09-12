@@ -48,18 +48,13 @@ const registerUser = (userInfo) => new Promise((resolve, reject) => {
 const signInWithUsername = (userName, password) => new Promise((resolve, reject) => {
   fetch(`${clientCredentials.databaseURL.replace(/"/g, '')}/checkuser`, {
     method: 'POST',
-    body: JSON.stringify({ userName, password }),
+    body: JSON.stringify({ user_name: userName, password }),
     headers: {
       'Content-Type': 'application/json',
       Accept: 'application/json',
     },
   })
-    .then((resp) => {
-      if (!resp.ok) {
-        throw new Error('Invalid credentials');
-      }
-      return resp.json();
-    })
+    .then((resp) => resp.json())
     .then(resolve)
     .catch(reject);
 });
