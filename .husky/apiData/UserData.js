@@ -31,7 +31,7 @@ const getSingleUser = (uid) => {
 };
 
 const deleteUser = (uid) => {
-  return fetch(`${clientCredentials.databaseURL}/users/${userId}`, {
+  return fetch(`${clientCredentials.databaseURL}/users/${uid}`, {
     method: 'DELETE',
     headers: {
       'Content-Type': 'application/json',
@@ -46,7 +46,7 @@ const deleteUser = (uid) => {
 };
 
 const updateUser = (uid, updatedUser) => {
-  return fetch(`${clientCredentials.databaseURL}/users/${userId}`, {
+  return fetch(`${clientCredentials.databaseURL}/users/${uid}`, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
