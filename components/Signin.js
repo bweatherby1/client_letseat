@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
-import { Form, Button, Alert } from 'react-bootstrap';
+import {
+  Form, Button, Alert, Spinner,
+} from 'react-bootstrap';
 import { useRouter } from 'next/router';
 import { useAuth } from '../utils/context/authContext';
 import { registerUser } from '../utils/auth';
@@ -10,30 +12,45 @@ function Signin() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
   const { login } = useAuth();
   const router = useRouter();
 
   const handleLogin = (e) => {
     e.preventDefault();
+    setIsLoading(true);
     login(username, password, 'username')
       .then(() => router.push('/'))
-      .catch(() => setError('Login failed. Please try again.'));
+      .catch(() => {
+        setError('Login failed. Please try again.');
+        setIsLoading(false);
+      });
   };
 
   const handleRegistration = (userData) => {
+    setIsLoading(true);
     registerUser(userData)
+      .then((registeredUser) => login(registeredUser.user_name, userData.password, 'username'))
       .then(() => {
-        setShowRegistration(false);
-        setError('');
-        login(userData.name, userData.password, 'username')
-          .then(() => router.push('/'))
-          .catch(() => setError('Registration successful, but login failed. Please try logging in.'));
+        setIsLoading(false);
+        router.push('/');
       })
       .catch((err) => {
+        setIsLoading(false);
         console.error('Registration error:', err);
-        setError('Registration failed. Please try again.');
+        setError('Registration or login failed. Please try again.');
       });
   };
+
+  if (isLoading) {
+    return (
+      <div className="d-flex justify-content-center align-items-center" style={{ height: '100vh' }}>
+        <Spinner animation="border" role="status">
+          <span className="visually-hidden">Loading...</span>
+        </Spinner>
+      </div>
+    );
+  }
 
   return (
     <div

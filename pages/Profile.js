@@ -30,7 +30,7 @@ export default function ProfilePage() {
         logout();
         router.push('/');
       } catch (error) {
-        console.error('Error deleting user:', error);
+        console.error('Error deleting user:', error.message);
       }
     }
   };

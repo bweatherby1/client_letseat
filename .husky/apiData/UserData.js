@@ -35,18 +35,18 @@ const getSingleUser = (uid) => {
     });
 };
 
-
-
-
-
 const deleteUser = (uid) => {
-  return fetch(`${clientCredentials.databaseURL}/users/${uid}`, {
-    method: 'DESTROY',
+  const apiUrl = clientCredentials.databaseURL.replace(/"/g, '');
+  return fetch(`${apiUrl}/users/${uid}`, {
+    method: 'DELETE',
     headers: {
       'Content-Type': 'application/json',
     },
   })
     .then((response) => {
+      if (response.status === 204) {
+        return {};
+      }
       if (!response.ok) {
         throw new Error('Failed to delete user');
       }
