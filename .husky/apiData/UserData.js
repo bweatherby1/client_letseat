@@ -16,6 +16,9 @@ const getAllUsers = () => {
 };
 
 const getSingleUser = (uid) => {
+  if (!uid) {
+    return Promise.reject(new Error('User ID is undefined'));
+  }
   return fetch(`${clientCredentials.databaseURL}/users/${uid}`, {
     method: 'GET',
     headers: {

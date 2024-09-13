@@ -1,28 +1,12 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { Card, Image } from 'react-bootstrap';
 import { useAuth } from '../utils/context/authContext';
-import Loading from '../components/Loading';
 
 export default function ProfilePage() {
-  const { user, userLoading, refreshUserData } = useAuth();
-
-  useEffect(() => {
-    if (user && user.uid) {
-      refreshUserData(user.uid);
-    }
-  }, [refreshUserData, user]);
-
-  if (userLoading) return <Loading />;
+  const { user } = useAuth();
 
   if (!user) {
-    return (
-      <Card className="text-center">
-        <Card.Body>
-          <Card.Title>Authentication Required</Card.Title>
-          <Card.Text>Please log in to view your profile.</Card.Text>
-        </Card.Body>
-      </Card>
-    );
+    return <div>Loading...</div>;
   }
 
   return (
@@ -32,6 +16,10 @@ export default function ProfilePage() {
           <div className="text-center mb-4">
             <Image
               src={user.profile_picture || 'https://via.placeholder.com/150'}
+              onError={(e) => {
+                e.target.onerror = null;
+                e.target.src = 'https://via.placeholder.com/150';
+              }}
               roundedCircle
               width={150}
               height={150}
