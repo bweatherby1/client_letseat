@@ -1,20 +1,23 @@
-import React, { useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, Image, Button } from 'react-bootstrap';
 import { useRouter } from 'next/router';
 import { useAuth } from '../utils/context/authContext';
-import { deleteUser } from '../.husky/apiData/UserData';
+import { deleteUser, getSingleUser } from '../.husky/apiData/UserData';
 
 export default function ProfilePage() {
   const { user, logout } = useAuth();
+  const [profileData, setProfileData] = useState(null);
   const router = useRouter();
 
   useEffect(() => {
-    console.warn('User data in ProfilePage:', user);
+    if (user && user.uid) {
+      getSingleUser(user.uid)
+        .then((data) => {
+          setProfileData(data);
+        })
+        .catch(console.error);
+    }
   }, [user]);
-
-  if (!user) {
-    return <div>Loading...</div>;
-  }
 
   const handleUpdate = () => {
     router.push(`/Users/edit/${user.uid}`);
@@ -32,13 +35,17 @@ export default function ProfilePage() {
     }
   };
 
+  if (!profileData) {
+    return <div>Loading...</div>;
+  }
+
   return (
     <div className="container mt-5">
       <Card>
         <Card.Body>
           <div className="text-center mb-4">
             <Image
-              src={user.profile_picture || 'https://placekitten.com/150/150'}
+              src={profileData.profile_picture || 'https://placekitten.com/150/150'}
               onError={(e) => {
                 e.target.onerror = null;
                 e.target.src = 'https://placekitten.com/150/150';
@@ -48,12 +55,11 @@ export default function ProfilePage() {
               height={150}
               alt="Profile Picture"
             />
-
           </div>
-          <h2 className="text-center mb-4">{user.name}</h2>
-          <p><strong>Username:</strong> {user.user_name}</p>
-          <p><strong>Bio:</strong> {user.bio}</p>
-          <p><strong>Address:</strong> {user.street_address}, {user.city}, {user.state} {user.zip_code}</p>
+          <h2 className="text-center mb-4">{profileData.name}</h2>
+          <p><strong>Username:</strong> {profileData.user_name}</p>
+          <p><strong>Bio:</strong> {profileData.bio}</p>
+          <p><strong>Address:</strong> {profileData.street_address}, {profileData.city}, {profileData.state} {profileData.zip_code}</p>
         </Card.Body>
         <Card.Footer className="text-center">
           <Button variant="primary" onClick={handleUpdate} className="me-2">

@@ -24,8 +24,9 @@ export default function EditUser() {
 
   const handleUpdate = async (formData) => {
     try {
-      await updateUser(uid, formData);
-      await refreshUserData(uid);
+      const userId = Array.isArray(uid) ? uid[0] : uid;
+      await updateUser(userId, formData);
+      await refreshUserData(userId);
       router.push('/Profile');
     } catch (error) {
       console.error('Error updating user:', error);

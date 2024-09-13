@@ -16,6 +16,7 @@ const AuthProvider = (props) => {
     setUserLoading(true);
     try {
       if (currentUser && currentUser.uid) {
+        console.warn('Refreshing user data for UID:', currentUser.uid);
         const userData = await getSingleUser(currentUser.uid);
         setUser(userData);
         localStorage.setItem('user', JSON.stringify(userData));
