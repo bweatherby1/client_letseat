@@ -12,14 +12,28 @@ export default function EditUser() {
   const { refreshUserData } = useAuth();
 
   useEffect(() => {
+    let isMounted = true;
     if (uid) {
       const userId = uid.split('/').pop();
       if (userId) {
-        getSingleUser(userId).then(setUserData).catch(console.error);
+        getSingleUser(userId)
+          .then((data) => {
+            if (isMounted) {
+              setUserData(data);
+            }
+          })
+          .catch((error) => {
+            if (isMounted) {
+              console.error(error);
+            }
+          });
       } else {
         console.error('Invalid user ID');
       }
     }
+    return () => {
+      isMounted = false;
+    };
   }, [uid]);
 
   const handleUpdate = async (formData) => {
