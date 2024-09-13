@@ -17,8 +17,6 @@ const getAllUsers = () => {
 
 const getSingleUser = (uid) => {
   if (!uid) throw new Error('User ID is undefined');
-  
-  console.log('Fetching user with ID:', uid);
   const apiUrl = clientCredentials.databaseURL.replace(/"/g, '');
   return fetch(`${apiUrl}/users/${uid}`)
     .then(response => {

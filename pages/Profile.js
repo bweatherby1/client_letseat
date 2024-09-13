@@ -10,13 +10,18 @@ export default function ProfilePage() {
   const router = useRouter();
 
   useEffect(() => {
+    let isMounted = true;
     if (user && user.uid) {
       getSingleUser(user.uid)
         .then((data) => {
-          setProfileData(data);
-        })
-        .catch(console.error);
+          if (isMounted) {
+            setProfileData(data);
+          }
+        });
     }
+    return () => {
+      isMounted = false;
+    };
   }, [user]);
 
   const handleUpdate = () => {

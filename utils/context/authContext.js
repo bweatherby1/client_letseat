@@ -16,7 +16,6 @@ const AuthProvider = (props) => {
     setUserLoading(true);
     try {
       if (currentUser && currentUser.uid) {
-        console.warn('Refreshing user data for UID:', currentUser.uid);
         const userData = await getSingleUser(currentUser.uid);
         setUser(userData);
         localStorage.setItem('user', JSON.stringify(userData));
@@ -42,7 +41,6 @@ const AuthProvider = (props) => {
   const login = useCallback(async (userName, password) => {
     try {
       const loggedInUser = await signInWithUsername(userName, password);
-      console.warn('Logged in user data:', loggedInUser);
       setUser(loggedInUser);
       localStorage.setItem('user', JSON.stringify(loggedInUser));
       await refreshUserData(loggedInUser);
