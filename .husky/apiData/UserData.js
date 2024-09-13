@@ -16,31 +16,35 @@ const getAllUsers = () => {
 };
 
 const getSingleUser = (uid) => {
-  if (!uid) {
-    return Promise.reject(new Error('User ID is undefined'));
-  }
-  return fetch(`${clientCredentials.databaseURL}/users/${uid}`, {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-  })
-    .then((response) => {
+  if (!uid) throw new Error('User ID is undefined');
+  const apiUrl = clientCredentials.databaseURL.replace(/"/g, '');
+  return fetch(`${apiUrl}/users/${uid}`)
+    .then(response => {
       if (!response.ok) {
-        throw new Error('Failed to fetch user');
+        return response.text().then(text => {
+          throw new Error(`Failed to fetch user: ${response.status} - ${text}`);
+        });
       }
       return response.json();
+    })
+    .catch(error => {
+      console.error('Error in getSingleUser:', error);
+      throw error;
     });
 };
 
 const deleteUser = (uid) => {
-  return fetch(`${clientCredentials.databaseURL}/users/${uid}`, {
+  const apiUrl = clientCredentials.databaseURL.replace(/"/g, '');
+  return fetch(`${apiUrl}/users/${uid}`, {
     method: 'DELETE',
     headers: {
       'Content-Type': 'application/json',
     },
   })
     .then((response) => {
+      if (response.status === 204) {
+        return {};
+      }
       if (!response.ok) {
         throw new Error('Failed to delete user');
       }
@@ -49,18 +53,18 @@ const deleteUser = (uid) => {
 };
 
 const updateUser = (uid, updatedUser) => {
-  return fetch(`${clientCredentials.databaseURL}/users/${uid}`, {
+  const apiUrl = clientCredentials.databaseURL.replace(/"/g, '');
+  return fetch(`${apiUrl}/users/${uid}`, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify(updatedUser),
   })
-    .then((response) => {
-      if (!response.ok) {
-        throw new Error('Failed to update user');
-      }
-      return response.json();
+    .then(response => response.ok ? response.json() : Promise.reject(`Failed to update user: ${response.status}`))
+    .catch(error => {
+      console.error('Error in updateUser:', error);
+      throw error;
     });
 };
 

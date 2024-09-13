@@ -55,7 +55,9 @@ const signInWithUsername = (userName, password) => new Promise((resolve, reject)
     },
   })
     .then((resp) => resp.json())
-    .then(resolve)
+    .then((data) => {
+      resolve(data);
+    })
     .catch(reject);
 });
 

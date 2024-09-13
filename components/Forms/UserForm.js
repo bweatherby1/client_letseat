@@ -52,6 +52,7 @@ function UserForm({ onSubmit, initialData = {} }) {
           value={formData.user_name}
           onChange={handleChange}
           required
+          autoComplete="username"
         />
       </Form.Group>
       <Form.Group className="mb-3">
@@ -64,6 +65,7 @@ function UserForm({ onSubmit, initialData = {} }) {
             value={formData.password}
             onChange={handleChange}
             required
+            autoComplete="current-password"
           />
           <Button
             variant="outline-secondary"
@@ -108,7 +110,6 @@ function UserForm({ onSubmit, initialData = {} }) {
           }}
         />
       </Form.Group>
-
       <Form.Group className="mb-3">
         <Form.Label>Street Address</Form.Label>
         <Form.Control
