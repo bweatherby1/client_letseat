@@ -15,9 +15,11 @@ const AuthProvider = (props) => {
   const refreshUserData = useCallback(async (currentUser) => {
     setUserLoading(true);
     try {
-      const userData = await getSingleUser(currentUser.uid);
-      setUser(userData);
-      localStorage.setItem('user', JSON.stringify(userData));
+      if (currentUser && currentUser.uid) {
+        const userData = await getSingleUser(currentUser.uid);
+        setUser(userData);
+        localStorage.setItem('user', JSON.stringify(userData));
+      }
     } catch (error) {
       console.error('Error refreshing user data:', error);
     } finally {
@@ -39,13 +41,15 @@ const AuthProvider = (props) => {
   const login = useCallback(async (userName, password) => {
     try {
       const loggedInUser = await signInWithUsername(userName, password);
+      console.warn('Logged in user data:', loggedInUser);
       setUser(loggedInUser);
       localStorage.setItem('user', JSON.stringify(loggedInUser));
+      await refreshUserData(loggedInUser);
     } catch (error) {
       console.error('Error logging in:', error);
       throw error;
     }
-  }, []);
+  }, [refreshUserData]);
 
   const logout = useCallback(() => {
     signOut();

@@ -55,7 +55,10 @@ const signInWithUsername = (userName, password) => new Promise((resolve, reject)
     },
   })
     .then((resp) => resp.json())
-    .then(resolve)
+    .then((data) => {
+      console.warn('Response from /checkuser:', data);
+      resolve(data);
+    })
     .catch(reject);
 });
 
