@@ -2,16 +2,15 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { Image, Button, Modal } from 'react-bootstrap';
 import { useAuth } from '../../utils/context/authContext';
-import { getSingleRestaurant, toggleRestaurantSelection, deleteRestaurant } from '../../.husky/apiData/RestaurantData';
+import { getSingleRestaurant, deleteRestaurant } from '../../.husky/apiData/RestaurantData';
 import { getSingleCategory } from '../../.husky/apiData/CategoryData';
 
 export default function RestaurantDetails() {
   const [restaurant, setRestaurant] = useState(null);
-  const [isSelected, setIsSelected] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const router = useRouter();
   const { id } = router.query;
-  const { user } = useAuth();
+  const { selectedRestaurants, toggleSelectedRestaurant } = useAuth();
 
   useEffect(() => {
     if (id) {
@@ -24,11 +23,10 @@ export default function RestaurantDetails() {
     }
   }, [id]);
 
-  const handleToggle = async () => {
-    if (restaurant) {
-      const updatedSelection = await toggleRestaurantSelection(id, user.uid);
-      setIsSelected(!!updatedSelection.is_selected);
-    }
+  const isSelected = selectedRestaurants.includes(Number(id));
+
+  const handleToggle = () => {
+    toggleSelectedRestaurant(Number(id));
   };
 
   const handleUpdate = () => {

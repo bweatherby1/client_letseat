@@ -11,6 +11,7 @@ AuthContext.displayName = 'AuthContext';
 const AuthProvider = (props) => {
   const [user, setUser] = useState(null);
   const [userLoading, setUserLoading] = useState(true);
+  const [selectedRestaurants, setSelectedRestaurants] = useState([]);
 
   const refreshUserData = useCallback(async (currentUser) => {
     setUserLoading(true);
@@ -38,6 +39,17 @@ const AuthProvider = (props) => {
     }
   }, [refreshUserData]);
 
+  useEffect(() => {
+    if (user) {
+      const storedSelectedRestaurants = localStorage.getItem(`selectedRestaurants_${user.uid}`);
+      if (storedSelectedRestaurants) {
+        setSelectedRestaurants(JSON.parse(storedSelectedRestaurants));
+      } else {
+        setSelectedRestaurants([]);
+      }
+    }
+  }, [user]);
+
   const login = useCallback(async (userName, password) => {
     try {
       const loggedInUser = await signInWithUsername(userName, password);
@@ -53,8 +65,22 @@ const AuthProvider = (props) => {
   const logout = useCallback(() => {
     signOut();
     setUser(null);
+    setSelectedRestaurants([]);
     localStorage.removeItem('user');
   }, []);
+
+  const toggleSelectedRestaurant = useCallback((restaurantId) => {
+    setSelectedRestaurants((prev) => {
+      const newSelected = prev.includes(restaurantId)
+        ? prev.filter((id) => id !== restaurantId)
+        : [...prev, restaurantId];
+
+      if (user) {
+        localStorage.setItem(`selectedRestaurants_${user.uid}`, JSON.stringify(newSelected));
+      }
+      return newSelected;
+    });
+  }, [user]);
 
   const value = useMemo(() => ({
     user,
@@ -62,7 +88,9 @@ const AuthProvider = (props) => {
     login,
     logout,
     refreshUserData,
-  }), [user, userLoading, login, logout, refreshUserData]);
+    selectedRestaurants,
+    toggleSelectedRestaurant,
+  }), [user, userLoading, login, logout, refreshUserData, selectedRestaurants, toggleSelectedRestaurant]);
 
   return <AuthContext.Provider value={value} {...props} />;
 };

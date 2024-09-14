@@ -1,23 +1,18 @@
-import React, { useState } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import Link from 'next/link';
 import { Button, Image } from 'react-bootstrap';
-import { toggleRestaurantSelection } from '../.husky/apiData/RestaurantData';
 import { useAuth } from '../utils/context/authContext';
 
 const RestaurantCard = ({
   id, name, imageUrl, streetAddress, city, state, zipCode,
 }) => {
-  const [isSelected, setIsSelected] = useState(false);
-  const { user } = useAuth();
+  const { selectedRestaurants, toggleSelectedRestaurant } = useAuth();
 
-  const toggleSelection = async () => {
-    try {
-      await toggleRestaurantSelection(id, user.uid);
-      setIsSelected(!isSelected);
-    } catch (error) {
-      console.error('Error toggling restaurant selection:', error);
-    }
+  const isSelected = selectedRestaurants.includes(id);
+
+  const toggleSelection = () => {
+    toggleSelectedRestaurant(id);
   };
 
   const googleMapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${streetAddress}, ${city}, ${state} ${zipCode}`)}`;
@@ -39,7 +34,6 @@ const RestaurantCard = ({
       <Link href={`/Restaurants/${id}`} passHref>
         <Button variant="primary">View Details</Button>
       </Link>
-
     </div>
   );
 };

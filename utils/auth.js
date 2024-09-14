@@ -56,7 +56,12 @@ const signInWithUsername = (userName, password) => new Promise((resolve, reject)
   })
     .then((resp) => resp.json())
     .then((data) => {
-      resolve(data);
+      const storedSelectedRestaurants = localStorage.getItem(`selectedRestaurants_${data.uid}`);
+      const selectedRestaurants = storedSelectedRestaurants ? JSON.parse(storedSelectedRestaurants) : [];
+      resolve({
+        ...data,
+        selectedRestaurants,
+      });
     })
     .catch(reject);
 });
