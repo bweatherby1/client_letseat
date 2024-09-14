@@ -76,21 +76,16 @@ const updateRestaurant = async (id, restaurantData) => {
   return response.json();
 };
 
-const deleteRestaurant = (id) => {
-  return fetch(`${clientCredentials.databaseURL}/restaurants/${id}`, {
+const deleteRestaurant = async (id) => {
+  const response = await fetch(`${endpoint}/restaurants/${id}`, {
     method: 'DELETE',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-  })
-    .then((response) => response.json())
-    .catch((error) => {
-      console.error('Error deleting restaurant:', error);
-      throw error;
-    });
-  };
+  });
+  if (!response.ok) {
+    throw new Error('Failed to delete restaurant');
+  }
+  return true;
+};
 
-  
 const toggleRestaurantSelection = async (restaurantId, userId) => {
     const response = await fetch(`${clientCredentials.databaseURL}/selected_restaurant`, {
       method: 'POST',

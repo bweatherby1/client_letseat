@@ -38,9 +38,12 @@ export default function RestaurantDetails() {
   const handleDelete = async () => {
     try {
       await deleteRestaurant(id);
-      router.push('/Restaurants');
+      router.push('/Restaurants/All');
     } catch (error) {
       console.error('Error deleting restaurant:', error);
+      alert('Failed to delete restaurant. Please try again.');
+    } finally {
+      setShowDeleteModal(false);
     }
   };
 

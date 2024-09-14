@@ -1,4 +1,3 @@
-// pages/Restaurants/edit/[id].js
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { useAuth } from '../../../utils/context/authContext';
