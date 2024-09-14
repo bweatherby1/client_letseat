@@ -24,8 +24,6 @@ const getAllRestaurants = () => new Promise((resolve, reject) => {
 
 
 const getSingleRestaurant = (id) => new Promise((resolve, reject) => {
-  console.log('Fetching restaurant with ID:', id);
-  console.log('Full URL:', `${endpoint}/restaurants/${id}`);
   fetch(`${endpoint}/restaurants/${id}`, {
     method: 'GET',
     headers: {
@@ -42,37 +40,41 @@ const getSingleRestaurant = (id) => new Promise((resolve, reject) => {
     .catch((error) => reject(error));
 });
 
-
-
-const createRestaurant = (restaurant) => {
-  return fetch(`${clientCredentials.databaseURL}/restaurants`, {
+const createRestaurant = (restaurant) => new Promise((resolve, reject) => {
+  fetch(`${endpoint}/restaurants`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify(restaurant),
   })
-    .then((response) => response.json())
-    .catch((error) => {
-      console.error('Error creating restaurant:', error);
-      throw error;
-    });
-  };
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      return response.json();
+    })
+    .then((data) => resolve(data))
+    .catch((error) => reject(error));
+});
 
-const updateRestaurant = (restaurant) => {
-  return fetch(`${clientCredentials.databaseURL}/restaurants/${restaurant.id}`, {
+const updateRestaurant = async (id, restaurantData) => {
+  const response = await fetch(`${endpoint}/restaurants/${id}`, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify(restaurant),
-  })
-    .then((response) => response.json())
-    .catch((error) => {
-      console.error('Error updating restaurant:', error);
-      throw error;
-    });
-  };
+    body: JSON.stringify({
+      ...restaurantData,
+      user: restaurantData.user.uid
+    }),
+  });
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.error || 'Failed to update restaurant');
+  }
+  return response.json();
+};
 
 const deleteRestaurant = (id) => {
   return fetch(`${clientCredentials.databaseURL}/restaurants/${id}`, {
@@ -88,15 +90,6 @@ const deleteRestaurant = (id) => {
     });
   };
 
-const getRestaurantById = async (id) => {
-    const response = await fetch(`${clientCredentials.databaseURL}/restaurants/${id}`);
-    console.log('API URL:', `${clientCredentials.databaseURL}/restaurants/${id}`);
-
-    if (!response.ok) {
-      throw new Error('Failed to fetch restaurant');
-    }
-    return response.json();
-  };
   
 const toggleRestaurantSelection = async (restaurantId, userId) => {
     const response = await fetch(`${clientCredentials.databaseURL}/selected_restaurant`, {
@@ -118,6 +111,5 @@ export {
   createRestaurant,
   updateRestaurant,
   deleteRestaurant,
-  getRestaurantById,
   toggleRestaurantSelection,
 };

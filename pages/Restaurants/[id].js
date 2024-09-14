@@ -3,6 +3,7 @@ import { useRouter } from 'next/router';
 import { Image, Button, Modal } from 'react-bootstrap';
 import { useAuth } from '../../utils/context/authContext';
 import { getSingleRestaurant, toggleRestaurantSelection, deleteRestaurant } from '../../.husky/apiData/RestaurantData';
+import { getSingleCategory } from '../../.husky/apiData/CategoryData';
 
 export default function RestaurantDetails() {
   const [restaurant, setRestaurant] = useState(null);
@@ -13,19 +14,21 @@ export default function RestaurantDetails() {
   const { user } = useAuth();
 
   useEffect(() => {
-    if (id && Number(id) >= 1 && Number(id) <= 30) {
-      getSingleRestaurant(id).then((data) => {
-        setRestaurant(data);
-        setIsSelected(data.is_selected);
-      });
-    } else {
-      router.push('/404');
+    if (id) {
+      getSingleRestaurant(id)
+        .then(async (restaurantData) => {
+          const categoryData = await getSingleCategory(restaurantData.category);
+          setRestaurant({ ...restaurantData, category: categoryData });
+        })
+        .catch(console.error);
     }
-  }, [id, router]);
+  }, [id]);
 
   const handleToggle = async () => {
-    const updatedSelection = await toggleRestaurantSelection(id, user.uid);
-    setIsSelected(updatedSelection.is_selected);
+    if (restaurant) {
+      const updatedSelection = await toggleRestaurantSelection(id, user.uid);
+      setIsSelected(!!updatedSelection.is_selected);
+    }
   };
 
   const handleUpdate = () => {
@@ -53,9 +56,13 @@ export default function RestaurantDetails() {
         <p>{restaurant.street_address}</p>
         <p>{`${restaurant.city}, ${restaurant.state} ${restaurant.zip_code}`}</p>
       </a>
-      <p>Category: {restaurant.category.name}</p>
+      <p>Category: {restaurant.category?.name || 'Uncategorized'}</p>
       <label className="switch">
-        <input type="checkbox" checked={isSelected} onChange={handleToggle} />
+        <input
+          type="checkbox"
+          checked={isSelected}
+          onChange={handleToggle}
+        />
         <span className="slider round" aria-label={`Select ${restaurant.name}`} />
       </label>
       <Button variant="primary" onClick={handleUpdate}>Update</Button>
