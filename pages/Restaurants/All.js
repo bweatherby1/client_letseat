@@ -10,7 +10,6 @@ export default function All() {
   useEffect(() => {
     getAllRestaurants()
       .then((data) => {
-        console.warn('Received data:', data);
         setRestaurants(data);
       })
       .catch((err) => {
