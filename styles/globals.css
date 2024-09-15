@@ -18,7 +18,10 @@ a {
 }
 
 body {
-  background-color: #88effd;
+  background-image: url('/letsEatBG.jpg');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
 }
 
 .restaurant-card {
@@ -109,73 +112,72 @@ input:checked + .slider:before {
 .slider.round:before {
   border-radius: 50%;
 }
+  .spinner-container {
+    width: 100%;
+    max-width: 500px;
+    margin: 0 auto;
+    position: relative;
+  }
 
-.spinner-container {
-  width: 100%;
-  max-width: 500px;
-  margin: 0 auto;
-  position: relative;
-}
+  .pizza-spinner {
+    width: 500px;
+    height: 500px;
+    position: relative;
+    margin: 0 auto;
+  }
 
-.pizza-spinner {
-  width: 500px;
-  height: 500px;
-  position: relative;
-  margin: 0 auto;
-}
+  .wheel {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    position: relative;
+    overflow: hidden;
+    transition: transform 5s cubic-bezier(0.25, 0.1, 0.25, 1);
+  }
 
-.wheel {
-  width: 100%;
-  height: 100%;
-  border-radius: 50%;
-  position: relative;
-  overflow: hidden;
-  transition: transform 5s cubic-bezier(0.25, 0.1, 0.25, 1);
-}
+  .slice {
+    position: absolute;
+    width: 50%;
+    height: 50%;
+    transform: rotate(var(--rotation, 0deg));
+    transform-origin: bottom right;
+    left: 50%;
+    top: 50%;
+    margin-left: -50%;
+    margin-top: -50%;
+    clip-path: polygon(100% 0, 0 0, 100% 100%);
+  }
 
-.slice {
-  position: absolute;
-  width: 50%;
-  height: 50%;
-  transform: rotate(var(--rotation, 0deg));
-  transform-origin: bottom right;
-  left: 50%;
-  top: 50%;
-  margin-left: -50%;
-  margin-top: -50%;
-  clip-path: polygon(100% 0, 0 0, 100% 100%);
-}
+  .content {
+    position: absolute;
+    left: 30%;
+    top: 15%;
+    transform: rotate(-45deg);
+    text-align: center;
+  }
 
-.content {
-  position: absolute;
-  left: 30%;
-  top: 15%;
-  transform: rotate(-45deg);
-  text-align: center;
-}
+  .content img {
+    width: 50px;
+    height: 50px;
+    object-fit: cover;
+    border-radius: 50%;
+    margin-bottom: 5px;
+  }
 
-.content img {
-  width: 50px;
-  height: 50px;
-  object-fit: cover;
-  border-radius: 50%;
-  margin-bottom: 5px;
-}
+  .content span {
+    display: block;
+    font-size: 12px;
+    font-weight: bold;
+    color: #333;
+  }
 
-.content span {
-  display: block;
-  font-size: 12px;
-  font-weight: bold;
-  color: #333;
-}
+  .spin-button {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 10;
+  }
 
-.spin-button {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  z-index: 10;
-}
-
-.slice:nth-child(odd) { background-color: #FF6B6B; }
-.slice:nth-child(even) { background-color: #4ECDC4; }
+  .slice:nth-child(odd) { background-color: #FF6B6B; }
+  .slice:nth-child(even) { background-color: #4ECDC4; }
