@@ -1,7 +1,8 @@
 import { clientCredentials } from "../../utils/client";
 
 const getAllUsers = () => {
-  return fetch(`${clientCredentials.databaseURL}/users`, {
+  const apiUrl = clientCredentials.databaseURL.replace(/"/g, '');
+  return fetch(`${apiUrl}/users`, {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',

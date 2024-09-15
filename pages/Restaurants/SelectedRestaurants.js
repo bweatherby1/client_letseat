@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { Row, Col } from 'react-bootstrap';
+import { Row, Col, Button } from 'react-bootstrap';
+import { useRouter } from 'next/router';
 import { useAuth } from '../../utils/context/authContext';
 import RestaurantCard from '../../components/RestaurantCard';
 import { getSingleRestaurant } from '../../.husky/apiData/RestaurantData';
@@ -7,6 +8,7 @@ import { getSingleRestaurant } from '../../.husky/apiData/RestaurantData';
 export default function SelectedRestaurants() {
   const { selectedRestaurants } = useAuth();
   const [restaurants, setRestaurants] = useState([]);
+  const router = useRouter();
 
   useEffect(() => {
     const fetchSelectedRestaurants = async () => {
@@ -21,9 +23,14 @@ export default function SelectedRestaurants() {
     }
   }, [selectedRestaurants]);
 
+  const handleSpinnerClick = () => {
+    router.push('/Spinner');
+  };
+
   return (
     <div>
       <h1>Selected Restaurants</h1>
+      <Button onClick={handleSpinnerClick} className="mb-3">Go to Spinner</Button>
       <Row xs={1} md={2} lg={3} className="g-4">
         {restaurants.map((restaurant) => (
           <Col key={restaurant.id}>
