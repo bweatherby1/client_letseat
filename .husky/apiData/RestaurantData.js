@@ -100,6 +100,19 @@ const toggleRestaurantSelection = async (restaurantId, userId) => {
     return response.json();
   };
 
+  const getUserRestaurants = async (userId) => {
+    const baseUrl = clientCredentials.databaseURL.replace(/"/g, '');
+    const response = await fetch(`${baseUrl}/restaurants/by_user?user=${userId}`);
+     
+    if (!response.ok) {
+      throw new Error('Failed to fetch user restaurants');
+    }
+     
+    return response.json();
+  };
+  
+  
+
 export {
   getAllRestaurants,
   getSingleRestaurant,
@@ -107,4 +120,5 @@ export {
   updateRestaurant,
   deleteRestaurant,
   toggleRestaurantSelection,
+  getUserRestaurants,
 };
