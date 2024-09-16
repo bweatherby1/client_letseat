@@ -49,19 +49,33 @@ export default function Spinner() {
   const handleSpin = () => {
     if (spinning) return;
     setSpinning(true);
-    const totalRotation = 360 * 5 + Math.floor(Math.random() * 360);
-    const duration = 5000;
 
+    // Calculate slice angle
+    const sliceAngle = 360 / restaurants.length;
+
+    // Choose a random slice to win
+    const winningIndex = Math.floor(Math.random() * restaurants.length);
+
+    // Rotation needed to make the winning slice land at the top
+    const rotationToWinningIndex = (360 - (winningIndex * sliceAngle) + (sliceAngle / 2)) % 360;
+
+    // Total rotation including multiple spins
+    const totalRotation = 360 * 5 + rotationToWinningIndex;
+
+    // Apply rotation
+    const duration = 5000; // Spin for 5 seconds
     wheelRef.current.style.transition = `transform ${duration}ms cubic-bezier(0.25, 0.1, 0.25, 1)`;
     wheelRef.current.style.transform = `rotate(${totalRotation}deg)`;
 
     setTimeout(() => {
       setSpinning(false);
       wheelRef.current.style.transition = 'none';
-      const actualRotation = totalRotation % 360;
-      wheelRef.current.style.transform = `rotate(${actualRotation}deg)`;
-      const winningIndex = Math.floor(restaurants.length - (actualRotation / (360 / restaurants.length)));
-      alert(`You've won: ${restaurants[winningIndex].name}!`);
+
+      // Calculate the final index based on the remaining rotation
+      const finalRotation = totalRotation % 360;
+      const finalIndex = Math.floor((360 - finalRotation + (sliceAngle / 2)) / sliceAngle) % restaurants.length;
+
+      alert(`You've won: ${restaurants[finalIndex].name}!`);
     }, duration);
   };
 

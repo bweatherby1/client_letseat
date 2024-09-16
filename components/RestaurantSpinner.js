@@ -24,6 +24,7 @@ const RestaurantSpinner = forwardRef(({ restaurants, onSpin }, ref) => {
             </div>
           ))}
         </div>
+        <div className="pointer" />
         <Button onClick={onSpin} className="spin-button">SPIN</Button>
       </div>
     </div>

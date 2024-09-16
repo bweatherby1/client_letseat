@@ -120,16 +120,16 @@ input:checked + .slider:before {
 }
 
 .spinner-container {
+  position: relative;
   width: 100%;
   max-width: 500px;
   margin: 0 auto;
-  position: relative;
 }
 
 .pizza-spinner {
+  position: relative;
   width: 500px;
   height: 500px;
-  position: relative;
   margin: 0 auto;
 }
 
@@ -140,6 +140,7 @@ input:checked + .slider:before {
   position: relative;
   overflow: hidden;
   transition: transform 5s cubic-bezier(0.25, 0.1, 0.25, 1);
+  transform-origin: center;
 }
 
 .slice {
@@ -186,8 +187,24 @@ input:checked + .slider:before {
   z-index: 10;
 }
 
+.pointer {
+  position: absolute;
+  top: -50px; /* Moves the pointer above the spinner */
+  left: 50%;
+  transform: translateX(-50%); /* Center it horizontally */
+  width: 0;
+  height: 0;
+  border-left: 20px solid transparent;
+  border-right: 20px solid transparent;
+  border-top: 40px solid #ff0000; /* This ensures the triangle points downward */
+  z-index: 10;
+}
+
 .slice:nth-child(odd) { background-color: #FF6B6B; }
 .slice:nth-child(even) { background-color: #4ECDC4; }
+
+
+
 
 .header {
   width: 100%;
@@ -313,3 +330,18 @@ footer {
     box-shadow: none !important;
     border: none !important;
   }
+
+  .pointer {
+    position: absolute;
+    top: -50px; /* Adjust as needed to be above the spinner */
+    left: 50%;
+    transform: translateX(-50%); /* Center it horizontally */
+    width: 0;
+    height: 0;
+    border-left: 20px solid transparent;
+    border-right: 20px solid transparent;
+    border-top: 40px solid #ff0000; /* Triangle pointing downwards */
+    z-index: 10;
+  }
+  
+  
