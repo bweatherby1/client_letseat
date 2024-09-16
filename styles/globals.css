@@ -1,4 +1,5 @@
 @import 'bootstrap/dist/css/bootstrap.css';
+@import url('https://fonts.googleapis.com/css2?family=Berkshire+Swash&display=swap');
 
 html,
 body {
@@ -6,6 +7,7 @@ body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen,
     Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
+  height: 100%;
 }
 
 a {
@@ -22,6 +24,10 @@ body {
   background-size: cover;
   background-position: center;
   background-attachment: fixed;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  margin: 0;
 }
 
 .restaurant-card {
@@ -112,72 +118,165 @@ input:checked + .slider:before {
 .slider.round:before {
   border-radius: 50%;
 }
-  .spinner-container {
-    width: 100%;
-    max-width: 500px;
-    margin: 0 auto;
-    position: relative;
+
+.spinner-container {
+  width: 100%;
+  max-width: 500px;
+  margin: 0 auto;
+  position: relative;
+}
+
+.pizza-spinner {
+  width: 500px;
+  height: 500px;
+  position: relative;
+  margin: 0 auto;
+}
+
+.wheel {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  position: relative;
+  overflow: hidden;
+  transition: transform 5s cubic-bezier(0.25, 0.1, 0.25, 1);
+}
+
+.slice {
+  position: absolute;
+  width: 50%;
+  height: 50%;
+  transform: rotate(var(--rotation, 0deg));
+  transform-origin: bottom right;
+  left: 50%;
+  top: 50%;
+  margin-left: -50%;
+  margin-top: -50%;
+  clip-path: polygon(100% 0, 0 0, 100% 100%);
+}
+
+.content {
+  position: absolute;
+  left: 30%;
+  top: 15%;
+  transform: rotate(-45deg);
+  text-align: center;
+}
+
+.content img {
+  width: 50px;
+  height: 50px;
+  object-fit: cover;
+  border-radius: 50%;
+  margin-bottom: 5px;
+}
+
+.content span {
+  display: block;
+  font-size: 12px;
+  font-weight: bold;
+  color: #333;
+}
+
+.spin-button {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 10;
+}
+
+.slice:nth-child(odd) { background-color: #FF6B6B; }
+.slice:nth-child(even) { background-color: #4ECDC4; }
+
+.header {
+  width: 100%;
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 16px 0;
+}
+
+.logo-link {
+  display: block;
+  cursor: pointer;
+}
+
+.transparent-navbar {
+  background-color: transparent !important;
+  height: 120px;
+  padding-top: 20px;
+  padding-bottom: 20px;
+  margin-top: 20px;
+}
+
+.logo-container {
+  width: 300px;
+  height: 100px;
+  margin-right: 2rem;
+}
+
+.navbar-brand {
+  font-size: 2rem;
+}
+
+.nav-link-custom {
+  font-family: 'Berkshire Swash', cursive;
+  color: #000 !important;
+  border: 2px solid #000;
+  border-radius: 5px;
+  padding: 10px 20px;
+  margin: 0 10px;
+  font-size: 1.5rem;
+}
+
+.sign-out-button {
+  font-family: 'Berkshire Swash', cursive;
+  border: 2px solid #000;
+  padding: 10px 20px;
+  font-size: 1.5rem;
+}
+
+.logo-container img {
+  width: 300px;
+  height: auto;
+}
+
+.content {
+  flex: 1 0 auto;
+}
+
+footer {
+  flex-shrink: 0;
+  margin-top: auto;
+}
+
+.custom-footer {
+  padding: 20px 0;
+}
+
+.footer-link {
+  font-size: 3em;
+  text-decoration: none;
+  color: #333;
+  display: block;
+  padding: 10px;
+  font-family: 'Berkshire Swash', cursive;
+}
+
+.footer-link:hover {
+  color: #007bff;
+}
+
+@media (max-width: 768px) {
+  .transparent-navbar {
+    height: auto;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    margin-top: 10px;
   }
 
-  .pizza-spinner {
-    width: 500px;
-    height: 500px;
-    position: relative;
-    margin: 0 auto;
+  .logo-container {
+    width: 200px;
+    height: auto;
   }
-
-  .wheel {
-    width: 100%;
-    height: 100%;
-    border-radius: 50%;
-    position: relative;
-    overflow: hidden;
-    transition: transform 5s cubic-bezier(0.25, 0.1, 0.25, 1);
-  }
-
-  .slice {
-    position: absolute;
-    width: 50%;
-    height: 50%;
-    transform: rotate(var(--rotation, 0deg));
-    transform-origin: bottom right;
-    left: 50%;
-    top: 50%;
-    margin-left: -50%;
-    margin-top: -50%;
-    clip-path: polygon(100% 0, 0 0, 100% 100%);
-  }
-
-  .content {
-    position: absolute;
-    left: 30%;
-    top: 15%;
-    transform: rotate(-45deg);
-    text-align: center;
-  }
-
-  .content img {
-    width: 50px;
-    height: 50px;
-    object-fit: cover;
-    border-radius: 50%;
-    margin-bottom: 5px;
-  }
-
-  .content span {
-    display: block;
-    font-size: 12px;
-    font-weight: bold;
-    color: #333;
-  }
-
-  .spin-button {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    z-index: 10;
-  }
-
-  .slice:nth-child(odd) { background-color: #FF6B6B; }
-  .slice:nth-child(even) { background-color: #4ECDC4; }
+}
