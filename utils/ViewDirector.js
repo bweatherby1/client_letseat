@@ -2,7 +2,9 @@ import PropTypes from 'prop-types';
 import { useAuth } from './context/authContext';
 import Loading from '../components/Loading';
 import Signin from '../components/Signin';
+import Header from '../components/Header';
 import NavBar from '../components/NavBar';
+import Footer from '../components/Footer';
 import UserForm from '../components/Forms/UserForm';
 
 const ViewDirectorBasedOnUserAuthStatus = ({ component: Component, pageProps }) => {
@@ -15,6 +17,7 @@ const ViewDirectorBasedOnUserAuthStatus = ({ component: Component, pageProps }) 
   if (user) {
     return (
       <>
+        <Header />
         <NavBar /> {/* NavBar only visible if user is logged in and is in every view */}
         <div className="container">
           {user.bio === null ? (
@@ -23,6 +26,7 @@ const ViewDirectorBasedOnUserAuthStatus = ({ component: Component, pageProps }) 
             <Component {...pageProps} />
           )}
         </div>
+        <Footer />
       </>
     );
   }
