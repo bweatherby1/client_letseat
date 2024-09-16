@@ -1,5 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import {
   Navbar,
   Container,
@@ -9,14 +10,27 @@ import {
 import { useAuth } from '../utils/context/authContext';
 
 export default function NavBar() {
-  const { logout } = useAuth();
+  const { user, logout } = useAuth();
 
   return (
     <Navbar collapseOnSelect expand="lg" className="transparent-navbar">
       <Container fluid>
         <Navbar.Toggle aria-controls="responsive-navbar-nav" />
         <Navbar.Collapse id="responsive-navbar-nav">
-          <Nav className="mx-auto">
+          <Nav className="me-auto">
+            <Link passHref href="/Profile">
+              <Nav.Link className="nav-link-custom p-0">
+                <Image
+                  src={user.profile_picture || 'https://placekitten.com/120/120'}
+                  width={120}
+                  height={120}
+                  alt="Profile"
+                  className="profile-picture"
+                />
+              </Nav.Link>
+            </Link>
+          </Nav>
+          <Nav className="center-links">
             <Link passHref href="/Restaurants/MyPlaces">
               <Nav.Link className="nav-link-custom">My Places</Nav.Link>
             </Link>
@@ -28,9 +42,6 @@ export default function NavBar() {
             </Link>
           </Nav>
           <Nav>
-            <Link passHref href="/Profile">
-              <Nav.Link className="nav-link-custom">Profile</Nav.Link>
-            </Link>
             <Button variant="outline-light" onClick={logout} className="sign-out-button">
               Sign Out
             </Button>
