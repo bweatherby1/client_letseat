@@ -1,51 +1,45 @@
-import React, { forwardRef, useEffect } from 'react';
-import { Button, Image } from 'react-bootstrap';
+import React, { useRef } from 'react';
 import PropTypes from 'prop-types';
+import { Button, Image } from 'react-bootstrap';
 
-const RestaurantSpinner = forwardRef(({ restaurants, onSpin }, ref) => {
-  useEffect(() => {
-    const items = ref.current.querySelectorAll('.slice');
-    items.forEach((item, index) => {
-      const rotation = (index / items.length) * 360;
-      item.style.setProperty('--rotation', `${rotation}deg`);
-    });
-  }, [restaurants, ref]);
+const RestaurantSpinner = ({ restaurants, onSpin }) => {
+  const wheelRef = useRef(null);
 
   return (
     <div className="spinner-container">
-      <div className="pizza-spinner">
-        <div className="wheel" ref={ref}>
-          {restaurants.map((restaurant) => (
-            <div key={restaurant.id} className="slice">
+      <div className="spinner-wrapper">
+        <div className="wheel" ref={wheelRef}>
+          {restaurants.map((restaurant, index) => (
+            <div
+              key={restaurant.id}
+              className="slice"
+              style={{ '--rotation': `${(360 / restaurants.length) * index}deg` }}
+            >
               <div className="content">
-                {restaurant.id !== 'dummy' && (
-                  <>
-                    <Image src={restaurant.image_url} alt={restaurant.name} />
-                    <span>{restaurant.name}</span>
-                  </>
-                )}
+                <Image src={restaurant.image_url} alt={restaurant.name} className="restaurant-image" />
+                <div>{restaurant.name}</div>
               </div>
             </div>
           ))}
         </div>
         <div className="pointer" />
-        <Button onClick={onSpin} className="spin-button">SPIN</Button>
+        <Button className="spin-button" onClick={onSpin}>
+          Spin
+        </Button>
       </div>
     </div>
   );
-});
+};
 
 RestaurantSpinner.propTypes = {
   restaurants: PropTypes.arrayOf(
     PropTypes.shape({
-      id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+      id: PropTypes.number.isRequired,
       name: PropTypes.string.isRequired,
       image_url: PropTypes.string.isRequired,
     }),
   ).isRequired,
   onSpin: PropTypes.func.isRequired,
 };
-
-RestaurantSpinner.displayName = 'RestaurantSpinner';
 
 export default RestaurantSpinner;

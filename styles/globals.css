@@ -121,87 +121,87 @@ input:checked + .slider:before {
 
 .spinner-container {
   position: relative;
-  width: 100%;
-  max-width: 500px;
+  width: 300px; /* Adjust as needed */
+  height: 300px;
   margin: 0 auto;
 }
 
-.pizza-spinner {
+.spinner-wrapper {
   position: relative;
-  width: 500px;
-  height: 500px;
-  margin: 0 auto;
+  width: 100%;
+  height: 100%;
 }
 
 .wheel {
+  position: absolute;
   width: 100%;
   height: 100%;
+  border: 2px solid goldenrod; /* Goldenrod border */
   border-radius: 50%;
-  position: relative;
-  overflow: hidden;
-  transition: transform 5s cubic-bezier(0.25, 0.1, 0.25, 1);
-  transform-origin: center;
+  background: conic-gradient(
+    #f00 0% 25%,
+    #0f0 25% 50%,
+    #00f 50% 75%,
+    #ff0 75% 100%
+  );
+  transform: rotate(0deg);
 }
 
 .slice {
   position: absolute;
-  width: 50%;
-  height: 50%;
-  transform: rotate(var(--rotation, 0deg));
-  transform-origin: bottom right;
-  left: 50%;
-  top: 50%;
-  margin-left: -50%;
-  margin-top: -50%;
-  clip-path: polygon(100% 0, 0 0, 100% 100%);
+  width: 100%;
+  height: 100%;
+  clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+  text-align: center;
+  line-height: 1.5;
+  transform-origin: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transform: rotate(var(--rotation));
 }
 
 .content {
-  position: absolute;
-  left: 30%;
-  top: 15%;
-  transform: rotate(-45deg);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
   text-align: center;
 }
 
-.content img {
-  width: 50px;
-  height: 50px;
+.restaurant-image {
+  width: 80px; /* Adjust size if needed */
+  height: 80px; /* Adjust size if needed */
   object-fit: cover;
   border-radius: 50%;
   margin-bottom: 5px;
 }
 
-.content span {
-  display: block;
-  font-size: 12px;
-  font-weight: bold;
-  color: #333;
-}
-
-.spin-button {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  z-index: 10;
-}
-
 .pointer {
   position: absolute;
-  top: -50px; /* Moves the pointer above the spinner */
+  top: -50px; /* Adjust to align with spinner */
   left: 50%;
-  transform: translateX(-50%); /* Center it horizontally */
+  transform: translateX(-50%);
   width: 0;
   height: 0;
   border-left: 20px solid transparent;
   border-right: 20px solid transparent;
-  border-top: 40px solid #ff0000; /* This ensures the triangle points downward */
+  border-top: 40px solid #ff0000; /* Triangle pointing downwards */
   z-index: 10;
 }
 
-.slice:nth-child(odd) { background-color: #FF6B6B; }
-.slice:nth-child(even) { background-color: #4ECDC4; }
+.spin-button {
+  position: absolute;
+  bottom: -60px; /* Adjust as needed */
+  left: 50%;
+  transform: translateX(-50%);
+  border-radius: 50%; /* Round button */
+  width: 50px; /* Adjust size as needed */
+  height: 50px; /* Adjust size as needed */
+}
+
+
+
 
 
 

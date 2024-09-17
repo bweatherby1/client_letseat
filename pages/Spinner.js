@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Dropdown, Button } from 'react-bootstrap';
 import { useAuth } from '../utils/context/authContext';
 import { getAllUsers } from '../.husky/apiData/UserData';
@@ -10,9 +10,52 @@ export default function Spinner() {
   const [restaurants, setRestaurants] = useState([]);
   const [users, setUsers] = useState([]);
   const [selectedUser, setSelectedUser] = useState(null);
-  const [spinning, setSpinning] = useState(false);
-  const wheelRef = useRef(null);
   const [winningRestaurant, setWinningRestaurant] = useState(null);
+  const [spinning, setSpinning] = useState(false);
+
+  // Dummy restaurant data for testing
+  const dummyRestaurants = [
+    { id: 1, name: 'Restaurant A', image_url: 'https://via.placeholder.com/80' },
+    { id: 2, name: 'Restaurant B', image_url: 'https://via.placeholder.com/80' },
+    { id: 3, name: 'Restaurant C', image_url: 'https://via.placeholder.com/80' },
+  ];
+
+  const handleSpin = () => {
+    if (spinning) return;
+    setSpinning(true);
+
+    const duration = Math.floor(Math.random() * (7000 - 3000 + 1)) + 3000;
+    const totalRotation = 360 * 5 + Math.floor(Math.random() * 360);
+
+    if (document.querySelector('.wheel')) {
+      const wheel = document.querySelector('.wheel');
+      wheel.style.transition = `transform ${duration}ms cubic-bezier(0.25, 0.1, 0.25, 1)`;
+      wheel.style.transform = `rotate(${totalRotation}deg)`;
+
+      setTimeout(() => {
+        wheel.style.transition = 'none';
+        wheel.style.transform = `rotate(${totalRotation % 360}deg)`;
+
+        const sliceAngle = 360 / dummyRestaurants.length;
+        const finalRotation = totalRotation % 360;
+        const winningIndex = Math.floor((finalRotation + (sliceAngle / 2)) / sliceAngle) % dummyRestaurants.length;
+
+        setWinningRestaurant(dummyRestaurants[winningIndex]);
+        setSpinning(false);
+      }, duration);
+    }
+  };
+
+  const handlePopupClose = (confirm) => {
+    document.getElementById('result-popup').style.display = 'none';
+
+    if (confirm && winningRestaurant) {
+      window.location.href = `/restaurants/${winningRestaurant.id}`;
+    } else {
+      setRestaurants((prev) => prev.filter(({ id }) => id !== winningRestaurant.id));
+      setWinningRestaurant(null);
+    }
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -45,43 +88,6 @@ export default function Spinner() {
     localStorage.setItem(`selectedRestaurants_${currentUserUid}`, JSON.stringify(combinedRestaurantIds));
     setRestaurants(restaurantObjects);
   };
-  const handleSpin = () => {
-    if (spinning || restaurants.length === 0) return;
-    setSpinning(true);
-
-    const duration = Math.floor(Math.random() * (7000 - 3000 + 1)) + 3000; // 3000ms to 7000ms
-    const totalRotation = 360 * 5 + Math.floor(Math.random() * 360);
-
-    wheelRef.current.style.transition = `transform ${duration}ms cubic-bezier(0.25, 0.1, 0.25, 1)`;
-    wheelRef.current.style.transform = `rotate(${totalRotation}deg)`;
-
-    setTimeout(() => {
-      wheelRef.current.style.transition = 'none';
-      wheelRef.current.style.transform = `rotate(${totalRotation % 360}deg)`;
-
-      // Calculate slice angle and index
-      const sliceAngle = 360 / restaurants.length;
-      const finalRotation = totalRotation % 360;
-      const winningIndex = Math.floor((finalRotation + (sliceAngle / 2)) / sliceAngle) % restaurants.length;
-
-      // Snap to nearest slice
-      setWinningRestaurant(restaurants[winningIndex]);
-
-      // Show popup
-      document.getElementById('result-popup').style.display = 'flex';
-      setSpinning(false);
-    }, duration);
-  };
-  const handlePopupClose = (confirm) => {
-    document.getElementById('result-popup').style.display = 'none';
-
-    if (confirm && winningRestaurant) {
-      window.location.href = `/Restaurants/${winningRestaurant.id}`;
-    } else {
-      setRestaurants((prev) => prev.filter(({ id }) => id !== winningRestaurant.id));
-      setWinningRestaurant(null);
-    }
-  };
 
   return (
     <div className="container mt-5">
@@ -98,7 +104,7 @@ export default function Spinner() {
           ))}
         </Dropdown.Menu>
       </Dropdown>
-      <RestaurantSpinner restaurants={restaurants} onSpin={handleSpin} ref={wheelRef} />
+      <RestaurantSpinner restaurants={restaurants} onSpin={handleSpin} />
 
       {winningRestaurant && (
         <div id="result-popup" className="popup">
