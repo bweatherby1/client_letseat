@@ -3,6 +3,7 @@ import React, {
 } from 'react';
 import { signOut, signInWithUsername } from '../auth';
 import { getSingleUser } from '../../.husky/apiData/UserData';
+import { createSelectedRestaurant, deleteSelectedRestaurant } from '../../.husky/apiData/RestaurantData';
 
 const AuthContext = createContext();
 
@@ -19,7 +20,7 @@ const AuthProvider = (props) => {
       if (currentUser && currentUser.uid) {
         const userData = await getSingleUser(currentUser.uid);
         setUser(userData);
-        localStorage.setItem('user', JSON.stringify(userData));
+        // Removed localStorage logic
       }
     } catch (error) {
       console.error('Error refreshing user data:', error);
@@ -33,20 +34,16 @@ const AuthProvider = (props) => {
     if (storedUser) {
       const parsedUser = JSON.parse(storedUser);
       setUser(parsedUser);
-      refreshUserData(parsedUser.uid);
+      refreshUserData(parsedUser);
     } else {
       setUserLoading(false);
     }
   }, [refreshUserData]);
 
+  // Removed localStorage effect for selected restaurants
   useEffect(() => {
     if (user) {
-      const storedSelectedRestaurants = localStorage.getItem(`selectedRestaurants_${user.uid}`);
-      if (storedSelectedRestaurants) {
-        setSelectedRestaurants(JSON.parse(storedSelectedRestaurants));
-      } else {
-        setSelectedRestaurants([]);
-      }
+      // Fetch selected restaurants from the backend if needed
     }
   }, [user]);
 
@@ -54,7 +51,7 @@ const AuthProvider = (props) => {
     try {
       const loggedInUser = await signInWithUsername(userName, password);
       setUser(loggedInUser);
-      localStorage.setItem('user', JSON.stringify(loggedInUser));
+      // Removed localStorage logic
       await refreshUserData(loggedInUser);
     } catch (error) {
       console.error('Error logging in:', error);
@@ -65,22 +62,33 @@ const AuthProvider = (props) => {
   const logout = useCallback(() => {
     signOut();
     setUser(null);
-    setSelectedRestaurants([]);
-    localStorage.removeItem('user');
+    setSelectedRestaurants([]); // Clear the in-memory state
+    // Removed localStorage logic
   }, []);
 
-  const toggleSelectedRestaurant = useCallback((restaurantId) => {
-    setSelectedRestaurants((prev) => {
-      const newSelected = prev.includes(restaurantId)
-        ? prev.filter((id) => id !== restaurantId)
-        : [...prev, restaurantId];
-
+  const toggleSelectedRestaurant = useCallback(async (restaurantId) => {
+    try {
       if (user) {
-        localStorage.setItem(`selectedRestaurants_${user.uid}`, JSON.stringify(newSelected));
+        const isSelected = selectedRestaurants.includes(restaurantId);
+
+        if (isSelected) {
+          await deleteSelectedRestaurant(restaurantId, user.uid); // Assuming this is defined
+        } else {
+          await createSelectedRestaurant(restaurantId, user.uid); // Assuming this is defined
+        }
+
+        // Update in-memory state
+        setSelectedRestaurants((prev) => {
+          const newSelected = isSelected
+            ? prev.filter((id) => id !== restaurantId)
+            : [...prev, restaurantId];
+          return newSelected;
+        });
       }
-      return newSelected;
-    });
-  }, [user]);
+    } catch (error) {
+      console.error('Error toggling selected restaurant:', error);
+    }
+  }, [user, selectedRestaurants]);
 
   const clearSelectedRestaurants = useCallback(() => {
     setSelectedRestaurants([]);

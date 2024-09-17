@@ -155,15 +155,17 @@ const getUserSelectedRestaurants = async (userId) => {
 };
 
 
-const getUserRestaurants = async (userId) => {
-  const response = await fetch(`${endpoint}/restaurants/by_user?user=${userId}`);
-   
-  if (!response.ok) {
-    throw new Error('Failed to fetch user restaurants');
-  }
-   
-  return response.json();
-};
+const getUserRestaurants = (userId) => new Promise((resolve, reject) => {
+  fetch(`${endpoint}/restaurants/by_user?user=${userId}`, {
+   method: 'Get',
+   headers: {
+    'Content-Type': 'application/json',
+   },
+  })
+  .then((response) => response.json())
+  .then((data) => resolve(data))
+  .catch(reject);
+});
 
 export {
   getAllRestaurants,

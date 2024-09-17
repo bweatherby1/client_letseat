@@ -3,25 +3,45 @@ import { Row, Col, Button } from 'react-bootstrap';
 import { useRouter } from 'next/router';
 import { useAuth } from '../../utils/context/authContext';
 import RestaurantCard from '../../components/RestaurantCard';
-import { getSingleRestaurant } from '../../.husky/apiData/RestaurantData';
+import { getUserSelectedRestaurants, getSingleRestaurant } from '../../.husky/apiData/RestaurantData';
 
 export default function SelectedRestaurants() {
-  const { selectedRestaurants } = useAuth();
+  const { user } = useAuth(); // Get user from context
   const [restaurants, setRestaurants] = useState([]);
   const router = useRouter();
 
   useEffect(() => {
     const fetchSelectedRestaurants = async () => {
-      const selectedRestaurantData = await Promise.all(
-        selectedRestaurants.map((id) => getSingleRestaurant(id)),
-      );
-      setRestaurants(selectedRestaurantData);
+      if (user && user.uid) {
+        try {
+          const selectedRestaurantData = await getUserSelectedRestaurants(user.uid);
+
+          if (selectedRestaurantData && selectedRestaurantData.length > 0) {
+            // Fetch restaurant details for each selected restaurant
+            const restaurantDetails = await Promise.all(
+              selectedRestaurantData.map((data) => {
+                // Use 'data.restaurant' for the restaurant ID
+                if (data.restaurant) {
+                  return getSingleRestaurant(data.restaurant);
+                }
+                console.error('Invalid restaurant ID:', data.restaurant);
+                return null;
+              }).filter(Boolean), // Remove any null values
+            );
+            setRestaurants(restaurantDetails);
+          } else {
+            setRestaurants([]);
+          }
+        } catch (error) {
+          console.error('Error fetching selected restaurants:', error);
+        }
+      } else {
+        console.error('User not authenticated or user.uid is missing');
+      }
     };
 
-    if (selectedRestaurants.length > 0) {
-      fetchSelectedRestaurants();
-    }
-  }, [selectedRestaurants]);
+    fetchSelectedRestaurants();
+  }, [user]);
 
   const handleSpinnerClick = () => {
     router.push('/Spinner');
