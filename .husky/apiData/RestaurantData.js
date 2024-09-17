@@ -19,10 +19,6 @@ const getAllRestaurants = () => new Promise((resolve, reject) => {
     .catch((error) => reject(error));
 });
 
-
-
-
-
 const getSingleRestaurant = (id) => new Promise((resolve, reject) => {
   fetch(`${endpoint}/restaurants/${id}`, {
     method: 'GET',
@@ -86,32 +82,82 @@ const deleteRestaurant = async (id) => {
   return true;
 };
 
-const toggleRestaurantSelection = async (restaurantId, userId) => {
-    const response = await fetch(`${clientCredentials.databaseURL}/selected_restaurant`, {
+// .husky/apiData/RestaurantData.js
+
+const createSelectedRestaurant = async (restaurantId, userId) => {
+  try {
+    const url = `${endpoint}/selected_restaurants`;
+    const data = { restaurant_id: restaurantId, user_uid: userId };
+    console.log('Creating selected restaurant with data:', data); // Log the data being sent
+    const response = await fetch(url, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ restaurant_id: restaurantId, user_id: userId }),
+      body: JSON.stringify(data),
     });
-    if (!response.ok) {
-      throw new Error('Failed to toggle restaurant selection');
-    }
-    return response.json();
-  };
 
-  const getUserRestaurants = async (userId) => {
-    const baseUrl = clientCredentials.databaseURL.replace(/"/g, '');
-    const response = await fetch(`${baseUrl}/restaurants/by_user?user=${userId}`);
-     
     if (!response.ok) {
-      throw new Error('Failed to fetch user restaurants');
+      throw new Error('Network response was not ok');
     }
-     
+
+    return await response.json();
+  } catch (error) {
+    console.error('Error creating selected restaurant:', error);
+    throw error;
+  }
+};
+
+const deleteSelectedRestaurant = async (restaurantId, userId) => {
+  try {
+    const url = `${endpoint}/selected_restaurants/${restaurantId}`;
+    const data = { restaurant_id: restaurantId, user_uid: userId };
+    console.log('Deleting selected restaurant with data:', data); // Log the data being sent
+    const response = await fetch(url, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+
+    if (!response.ok) {
+      throw new Error('Network response was not ok');
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Error deleting selected restaurant:', error);
+    throw error;
+  }
+};
+
+
+const getUserSelectedRestaurants = async (userUid) => {
+  console.log(`Fetching selected restaurants for user UID: ${userUid}`);
+  try {
+    const response = await fetch(`${endpoint}/selected_restaurants/by_user?user_uid=${userUid}`);
+    if (!response.ok) {
+      const errorDetails = await response.text();
+      console.error(`Error fetching user selected restaurants: ${errorDetails}`);
+      throw new Error(`Failed to fetch user selected restaurants: ${errorDetails}`);
+    }
     return response.json();
-  };
-  
-  
+  } catch (error) {
+    console.error(`Error in fetch operation: ${error.message}`);
+    throw error;
+  }
+};
+
+const getUserRestaurants = async (userId) => {
+  const response = await fetch(`${baseUrl}/restaurants/by_user?user=${userId}`);
+   
+  if (!response.ok) {
+    throw new Error('Failed to fetch user restaurants');
+  }
+   
+  return response.json();
+};
 
 export {
   getAllRestaurants,
@@ -119,6 +165,8 @@ export {
   createRestaurant,
   updateRestaurant,
   deleteRestaurant,
-  toggleRestaurantSelection,
+  createSelectedRestaurant,
+  deleteSelectedRestaurant,
+  getUserSelectedRestaurants,
   getUserRestaurants,
 };

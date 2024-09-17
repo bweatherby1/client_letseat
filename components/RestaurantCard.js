@@ -1,18 +1,46 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import Link from 'next/link';
 import { Button, Image } from 'react-bootstrap';
-import { useAuth } from '../utils/context/authContext';
+import { useAuth } from '../utils/context/authContext'; // Adjust the path as needed
+import { createSelectedRestaurant, deleteSelectedRestaurant, getUserSelectedRestaurants } from '../.husky/apiData/RestaurantData';
 
 const RestaurantCard = ({
   id, name, imageUrl, streetAddress, city, state, zipCode,
 }) => {
-  const { selectedRestaurants, toggleSelectedRestaurant } = useAuth();
+  const { toggleSelectedRestaurant, user } = useAuth();
+  const userUid = user?.uid;
+  const [isSelected, setIsSelected] = useState(false);
 
-  const isSelected = selectedRestaurants.includes(id);
+  useEffect(() => {
+    const fetchSelectedRestaurants = async () => {
+      try {
+        if (userUid) {
+          const data = await getUserSelectedRestaurants(userUid);
+          const restaurantIds = data.map((item) => item.restaurant_id);
+          setIsSelected(restaurantIds.includes(id));
+        }
+      } catch (error) {
+        console.error('Error fetching selected restaurants:', error);
+      }
+    };
 
-  const toggleSelection = () => {
-    toggleSelectedRestaurant(id);
+    fetchSelectedRestaurants();
+  }, [userUid, id]);
+
+  const handleToggle = async (event) => {
+    const newValue = event.target.checked;
+    try {
+      if (newValue) {
+        await createSelectedRestaurant(id, userUid);
+      } else {
+        await deleteSelectedRestaurant(id, userUid);
+      }
+      setIsSelected(newValue);
+      toggleSelectedRestaurant(id); // Update selected restaurants list
+    } catch (error) {
+      console.error('Error toggling restaurant selection:', error);
+    }
   };
 
   const googleMapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${streetAddress}, ${city}, ${state} ${zipCode}`)}`;
@@ -28,10 +56,10 @@ const RestaurantCard = ({
         </a>
       </div>
       <label className="switch">
-        <input type="checkbox" checked={isSelected} onChange={toggleSelection} />
+        <input type="checkbox" checked={isSelected} onChange={handleToggle} />
         <span className="slider round" aria-label={`Select ${name}`} />
       </label>
-      <Link href={`/Restaurants/${id}`} passHref>
+      <Link href={`/restaurants/${id}`} passHref>
         <Button variant="primary">View Details</Button>
       </Link>
     </div>
