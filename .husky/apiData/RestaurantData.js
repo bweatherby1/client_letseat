@@ -133,24 +133,30 @@ const deleteSelectedRestaurant = async (restaurantId, userId) => {
 };
 
 
-const getUserSelectedRestaurants = async (userUid) => {
-  console.log(`Fetching selected restaurants for user UID: ${userUid}`);
+const getUserSelectedRestaurants = async (userId) => {
   try {
-    const response = await fetch(`${endpoint}/selected_restaurants/by_user?user_uid=${userUid}`);
+    const data = { user_uid: userId };
+    const response = await fetch(`${endpoint}/selected_restaurants/by_user?user_uid=${userId}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
     if (!response.ok) {
-      const errorDetails = await response.text();
-      console.error(`Error fetching user selected restaurants: ${errorDetails}`);
-      throw new Error(`Failed to fetch user selected restaurants: ${errorDetails}`);
+      throw new Error('Network response was not ok');
     }
-    return response.json();
+
+    return await response.json();
   } catch (error) {
-    console.error(`Error in fetch operation: ${error.message}`);
+    console.error('Error fetching selected restaurants:', error);
     throw error;
   }
 };
 
+
 const getUserRestaurants = async (userId) => {
-  const response = await fetch(`${baseUrl}/restaurants/by_user?user=${userId}`);
+  const response = await fetch(`${endpoint}/restaurants/by_user?user=${userId}`);
    
   if (!response.ok) {
     throw new Error('Failed to fetch user restaurants');

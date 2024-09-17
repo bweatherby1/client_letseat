@@ -17,8 +17,11 @@ const RestaurantCard = ({
       try {
         if (userUid) {
           const data = await getUserSelectedRestaurants(userUid);
-          const restaurantIds = data.map((item) => item.restaurant_id);
-          setIsSelected(restaurantIds.includes(id));
+
+          // Ensure each item in data has the correct property
+          const selectedIds = data.map((item) => item.restaurant);
+
+          setIsSelected(selectedIds.includes(id));
         }
       } catch (error) {
         console.error('Error fetching selected restaurants:', error);
