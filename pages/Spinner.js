@@ -17,7 +17,7 @@ export default function Spinner() {
   useEffect(() => {
     const fetchData = async () => {
       const allUsers = await getAllUsers();
-      setUsers(allUsers.filter((u) => u.uid !== user.uid));
+      setUsers(allUsers.filter(({ uid }) => uid !== user.uid));
 
       const restaurantData = await Promise.all(
         selectedRestaurants.map((id) => getSingleRestaurant(id)),
@@ -29,7 +29,7 @@ export default function Spinner() {
   }, [user, selectedRestaurants]);
 
   const handleUserSelect = async (userId) => {
-    const selected = users.find((u) => u.uid === userId);
+    const selected = users.find(({ uid }) => uid === userId);
     setSelectedUser(selected);
 
     const currentUserUid = user.uid;
@@ -38,7 +38,6 @@ export default function Spinner() {
 
     const combinedRestaurantIds = [...new Set([...currentUserSelectedRestaurants, ...selectedUserRestaurants])];
 
-    // Fetch full restaurant objects
     const restaurantObjects = await Promise.all(
       combinedRestaurantIds.map((id) => getSingleRestaurant(id)),
     );
@@ -46,45 +45,40 @@ export default function Spinner() {
     localStorage.setItem(`selectedRestaurants_${currentUserUid}`, JSON.stringify(combinedRestaurantIds));
     setRestaurants(restaurantObjects);
   };
-
   const handleSpin = () => {
-    if (spinning) return;
+    if (spinning || restaurants.length === 0) return;
     setSpinning(true);
 
-    // Calculate total rotation with extra spins and random end angle
+    const duration = Math.floor(Math.random() * (7000 - 3000 + 1)) + 3000; // 3000ms to 7000ms
     const totalRotation = 360 * 5 + Math.floor(Math.random() * 360);
-    const duration = 5000; // Spin for 5 seconds
 
-    // Apply rotation to the wheel
     wheelRef.current.style.transition = `transform ${duration}ms cubic-bezier(0.25, 0.1, 0.25, 1)`;
     wheelRef.current.style.transform = `rotate(${totalRotation}deg)`;
 
     setTimeout(() => {
-      setSpinning(false);
       wheelRef.current.style.transition = 'none';
+      wheelRef.current.style.transform = `rotate(${totalRotation % 360}deg)`;
 
-      // Calculate the final resting position of the wheel
-      const actualRotation = totalRotation % 360;
+      // Calculate slice angle and index
       const sliceAngle = 360 / restaurants.length;
+      const finalRotation = totalRotation % 360;
+      const winningIndex = Math.floor((finalRotation + (sliceAngle / 2)) / sliceAngle) % restaurants.length;
 
-      // Adjust for pointer position (12 o'clock is 0 degrees)
-      const winningIndex = Math.floor((360 - actualRotation + (sliceAngle / 2)) / sliceAngle) % restaurants.length;
+      // Snap to nearest slice
       setWinningRestaurant(restaurants[winningIndex]);
 
       // Show popup
       document.getElementById('result-popup').style.display = 'flex';
+      setSpinning(false);
     }, duration);
   };
-
   const handlePopupClose = (confirm) => {
     document.getElementById('result-popup').style.display = 'none';
 
-    if (confirm) {
-      // Navigate to the winning restaurant's view page
+    if (confirm && winningRestaurant) {
       window.location.href = `/Restaurants/${winningRestaurant.id}`;
     } else {
-      // Remove the winning restaurant and reset the spinner
-      setRestaurants((prev) => prev.filter((r) => r.id !== winningRestaurant.id));
+      setRestaurants((prev) => prev.filter(({ id }) => id !== winningRestaurant.id));
       setWinningRestaurant(null);
     }
   };
@@ -97,16 +91,15 @@ export default function Spinner() {
           {selectedUser ? `Add ${selectedUser.name}'s restaurants` : 'Add another user\'s restaurants'}
         </Dropdown.Toggle>
         <Dropdown.Menu>
-          {users.map((u) => (
-            <Dropdown.Item key={u.uid} onClick={() => handleUserSelect(u.uid)}>
-              {u.name}
+          {users.map(({ uid, name }) => (
+            <Dropdown.Item key={uid} onClick={() => handleUserSelect(uid)}>
+              {name}
             </Dropdown.Item>
           ))}
         </Dropdown.Menu>
       </Dropdown>
       <RestaurantSpinner restaurants={restaurants} onSpin={handleSpin} ref={wheelRef} />
 
-      {/* Result Popup */}
       {winningRestaurant && (
         <div id="result-popup" className="popup">
           <div className="popup-content">

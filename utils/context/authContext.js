@@ -82,6 +82,14 @@ const AuthProvider = (props) => {
     });
   }, [user]);
 
+  const clearSelectedRestaurants = () => {
+    setSelectedRestaurants([]);
+  };
+
+  const removeSelectedRestaurant = (id) => {
+    setSelectedRestaurants((prevSelected) => prevSelected.filter((restaurantId) => restaurantId !== id));
+  };
+
   const value = useMemo(() => ({
     user,
     userLoading,
@@ -90,6 +98,8 @@ const AuthProvider = (props) => {
     refreshUserData,
     selectedRestaurants,
     toggleSelectedRestaurant,
+    clearSelectedRestaurants,
+    removeSelectedRestaurant,
   }), [user, userLoading, login, logout, refreshUserData, selectedRestaurants, toggleSelectedRestaurant]);
 
   return <AuthContext.Provider value={value} {...props} />;

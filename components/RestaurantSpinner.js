@@ -18,8 +18,12 @@ const RestaurantSpinner = forwardRef(({ restaurants, onSpin }, ref) => {
           {restaurants.map((restaurant) => (
             <div key={restaurant.id} className="slice">
               <div className="content">
-                <Image src={restaurant.image_url} alt={restaurant.name} />
-                <span>{restaurant.name}</span>
+                {restaurant.id !== 'dummy' && (
+                  <>
+                    <Image src={restaurant.image_url} alt={restaurant.name} />
+                    <span>{restaurant.name}</span>
+                  </>
+                )}
               </div>
             </div>
           ))}
