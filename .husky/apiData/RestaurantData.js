@@ -110,7 +110,7 @@ const createSelectedRestaurant = async (restaurantId, userId) => {
 
 const deleteSelectedRestaurant = async (restaurantId, userId) => {
   try {
-    const url = `${endpoint}/selected_restaurants/${restaurantId}`;
+    const url = `${endpoint}/selected_restaurants/${restaurantId}?user_uid=${userId}`;
     const data = { restaurant_id: restaurantId, user_uid: userId };
     console.log('Deleting selected restaurant with data:', data); // Log the data being sent
     const response = await fetch(url, {
@@ -154,6 +154,31 @@ const getUserSelectedRestaurants = async (userId) => {
   }
 };
 
+const toggleSelectedRestaurant = async (restaurantId, userUid) => {
+  try {
+    console.log(userUid, restaurantId)
+    const url = `${endpoint}/selected_restaurants/toggle_selected_restaurant`;
+    const data = { restaurant_id: restaurantId, user_uid: userUid };
+
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+
+    if (!response.ok) {
+      throw new Error('Network response was not ok');
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Error toggling selected restaurant:', error);
+    throw error;
+  }
+};
+
 
 const getUserRestaurants = (userId) => new Promise((resolve, reject) => {
   fetch(`${endpoint}/restaurants/by_user?user=${userId}`, {
@@ -177,4 +202,5 @@ export {
   deleteSelectedRestaurant,
   getUserSelectedRestaurants,
   getUserRestaurants,
+  toggleSelectedRestaurant,
 };

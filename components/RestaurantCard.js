@@ -1,49 +1,53 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import Link from 'next/link';
 import { Button, Image } from 'react-bootstrap';
-import { useAuth } from '../utils/context/authContext'; // Adjust the path as needed
-import { createSelectedRestaurant, deleteSelectedRestaurant, getUserSelectedRestaurants } from '../.husky/apiData/RestaurantData';
+import { useAuth } from '../utils/context/authContext';
+import { getUserSelectedRestaurants, toggleSelectedRestaurant } from '../.husky/apiData/RestaurantData';
 
 const RestaurantCard = ({
   id, name, imageUrl, streetAddress, city, state, zipCode,
 }) => {
-  const { toggleSelectedRestaurant, user } = useAuth();
+  const { user } = useAuth();
   const userUid = user?.uid;
   const [isSelected, setIsSelected] = useState(false);
+  const [loading, setLoading] = useState(false);
 
+  // Fetch selected restaurants and set the initial state
   useEffect(() => {
     const fetchSelectedRestaurants = async () => {
-      try {
-        if (userUid) {
+      if (userUid) {
+        try {
           const data = await getUserSelectedRestaurants(userUid);
-
           const selectedIds = data.map((item) => item.restaurant);
-
           setIsSelected(selectedIds.includes(id));
+        } catch (error) {
+          console.error('Error fetching selected restaurants:', error);
         }
-      } catch (error) {
-        console.error('Error fetching selected restaurants:', error);
       }
     };
 
     fetchSelectedRestaurants();
   }, [userUid, id]);
 
-  const handleToggle = async (event) => {
+  const handleToggle = useCallback(async (event) => {
+    if (loading) {
+      return; // Prevent multiple requests
+    }
+
     const newValue = event.target.checked;
+
+    setLoading(true); // Set loading to true to prevent multiple requests
+
     try {
-      if (newValue) {
-        await createSelectedRestaurant(id, userUid);
-      } else {
-        await deleteSelectedRestaurant(id, userUid);
-      }
-      setIsSelected(newValue);
-      toggleSelectedRestaurant(id); // Update selected restaurants list
+      await toggleSelectedRestaurant(id, userUid); // Pass id and userUid here
+      setIsSelected(newValue); // Update the local state
     } catch (error) {
       console.error('Error toggling restaurant selection:', error);
+    } finally {
+      setLoading(false); // Reset loading state after request
     }
-  };
+  }, [id, userUid, loading]); // Include userUid in dependencies
 
   const googleMapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${streetAddress}, ${city}, ${state} ${zipCode}`)}`;
 
@@ -58,7 +62,12 @@ const RestaurantCard = ({
         </a>
       </div>
       <label className="switch">
-        <input type="checkbox" checked={isSelected} onChange={handleToggle} />
+        <input
+          type="checkbox"
+          checked={isSelected}
+          onChange={handleToggle}
+          disabled={loading}
+        />
         <span className="slider round" aria-label={`Select ${name}`} />
       </label>
       <Link href={`/restaurants/${id}`} passHref>

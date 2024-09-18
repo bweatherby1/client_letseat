@@ -3,7 +3,7 @@ import React, {
 } from 'react';
 import { signOut, signInWithUsername } from '../auth';
 import { getSingleUser } from '../../.husky/apiData/UserData';
-import { createSelectedRestaurant, deleteSelectedRestaurant } from '../../.husky/apiData/RestaurantData';
+// import { createSelectedRestaurant, deleteSelectedRestaurant } from '../../.husky/apiData/RestaurantData';
 
 const AuthContext = createContext();
 
@@ -69,26 +69,21 @@ const AuthProvider = (props) => {
   const toggleSelectedRestaurant = useCallback(async (restaurantId) => {
     try {
       if (user) {
-        const isSelected = selectedRestaurants.includes(restaurantId);
+        const response = await toggleSelectedRestaurant(restaurantId, user.uid);
+        console.log(response.message);
 
-        if (isSelected) {
-          await deleteSelectedRestaurant(restaurantId, user.uid); // Assuming this is defined
-        } else {
-          await createSelectedRestaurant(restaurantId, user.uid); // Assuming this is defined
-        }
-
-        // Update in-memory state
+        // Update the in-memory state
         setSelectedRestaurants((prev) => {
-          const newSelected = isSelected
+          const isSelected = prev.includes(restaurantId);
+          return isSelected
             ? prev.filter((id) => id !== restaurantId)
             : [...prev, restaurantId];
-          return newSelected;
         });
       }
     } catch (error) {
       console.error('Error toggling selected restaurant:', error);
     }
-  }, [user, selectedRestaurants]);
+  }, [user]);
 
   const clearSelectedRestaurants = useCallback(() => {
     setSelectedRestaurants([]);
