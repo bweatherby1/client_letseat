@@ -119,86 +119,101 @@ input:checked + .slider:before {
   border-radius: 50%;
 }
 
+/* Spinner container */
 .spinner-container {
   position: relative;
   width: 300px; /* Adjust as needed */
-  height: 300px;
-  margin: 0 auto;
+  height: 300px; /* Adjust as needed */
+  margin: auto;
 }
 
-.spinner-wrapper {
+/* Spinner itself */
+.spinner {
   position: relative;
   width: 100%;
   height: 100%;
 }
 
-.wheel {
+/* Wheel of the spinner */
+.spinner-wheel {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  overflow: hidden; /* Hide anything outside the wheel */
+}
+
+/* Each slice of the spinner */
+.spinner-slice {
   position: absolute;
   width: 100%;
   height: 100%;
-  border: 2px solid goldenrod; /* Goldenrod border */
-  border-radius: 50%;
-  background: conic-gradient(
-    #f00 0% 25%,
-    #0f0 25% 50%,
-    #00f 50% 75%,
-    #ff0 75% 100%
-  );
-  transform: rotate(0deg);
+  clip-path: polygon(50% 50%, 100% 0, 100% 100%); /* Adjust clip-path for proper slice shape */
+  overflow: hidden;
 }
 
-.slice {
+/* Content inside each slice */
+.spinner-slice-content {
   position: absolute;
   width: 100%;
   height: 100%;
-  clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
-  text-align: center;
-  line-height: 1.5;
-  transform-origin: center;
   display: flex;
-  justify-content: center;
   align-items: center;
-  transform: rotate(var(--rotation));
+  justify-content: center;
+  text-align: center;
+  color: white; /* Ensure text is readable */
+  background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background for text visibility */
 }
 
-.content {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  text-align: center;
+/* Restaurant image styling */
+.spinrestaurant-image {
+  width: 100%;
+  height: auto; /* Maintain aspect ratio */
+  object-fit: cover; /* Ensure image covers the space */
 }
 
-.restaurant-image {
-  width: 80px; /* Adjust size if needed */
-  height: 80px; /* Adjust size if needed */
-  object-fit: cover;
+/* Restaurant name styling */
+.restaurant-name {
+  position: absolute;
+  bottom: 10px; /* Adjust as needed */
+  width: 100%;
+  text-align: center;
+  font-size: 16px; /* Adjust size as needed */
+  background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background for text visibility */
+  color: white; /* Text color */
+  padding: 5px;
+}
+
+
+#peg {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  background-color: red;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -100%);
   border-radius: 50%;
-  margin-bottom: 5px;
+  z-index: 2;
 }
 
-.pointer {
-  position: absolute;
-  top: -50px; /* Adjust to align with spinner */
-  left: 50%;
-  transform: translateX(-50%);
-  width: 0;
-  height: 0;
-  border-left: 20px solid transparent;
-  border-right: 20px solid transparent;
-  border-top: 40px solid #ff0000; /* Triangle pointing downwards */
-  z-index: 10;
+#button {
+  font-size: 24px;
+  border-radius: 10px;
+  width: 100px;
+  height: 60px;
+  color: white;
+  background: #89bd46;
+  border: none;
+  display: inline-block;
+  margin: 25px;
+  z-index: 3;
 }
 
-.spin-button {
-  position: absolute;
-  bottom: -60px; /* Adjust as needed */
-  left: 50%;
-  transform: translateX(-50%);
-  border-radius: 50%; /* Round button */
-  width: 50px; /* Adjust size as needed */
-  height: 50px; /* Adjust size as needed */
+#button:hover, #button:focus {
+  background: #79a339;
 }
+
 
 
 
@@ -212,6 +227,8 @@ input:checked + .slider:before {
   margin: 0 auto;
   padding: 16px 0;
 }
+
+
 
 .logo-link {
   display: block;
@@ -329,19 +346,6 @@ footer {
     outline: none !important;
     box-shadow: none !important;
     border: none !important;
-  }
-
-  .pointer {
-    position: absolute;
-    top: -50px; /* Adjust as needed to be above the spinner */
-    left: 50%;
-    transform: translateX(-50%); /* Center it horizontally */
-    width: 0;
-    height: 0;
-    border-left: 20px solid transparent;
-    border-right: 20px solid transparent;
-    border-top: 40px solid #ff0000; /* Triangle pointing downwards */
-    z-index: 10;
   }
   
   .popup {

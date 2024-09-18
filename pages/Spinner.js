@@ -6,45 +6,11 @@ import { getSingleRestaurant } from '../.husky/apiData/RestaurantData';
 import RestaurantSpinner from '../components/RestaurantSpinner';
 
 export default function Spinner() {
-  const { user, selectedRestaurants } = useAuth();
+  const { user } = useAuth();
   const [restaurants, setRestaurants] = useState([]);
   const [users, setUsers] = useState([]);
   const [selectedUser, setSelectedUser] = useState(null);
   const [winningRestaurant, setWinningRestaurant] = useState(null);
-  const [spinning, setSpinning] = useState(false);
-
-  // Dummy restaurant data for testing
-  const dummyRestaurants = [
-    { id: 1, name: 'Restaurant A', image_url: 'https://via.placeholder.com/80' },
-    { id: 2, name: 'Restaurant B', image_url: 'https://via.placeholder.com/80' },
-    { id: 3, name: 'Restaurant C', image_url: 'https://via.placeholder.com/80' },
-  ];
-
-  const handleSpin = () => {
-    if (spinning) return;
-    setSpinning(true);
-
-    const duration = Math.floor(Math.random() * (7000 - 3000 + 1)) + 3000;
-    const totalRotation = 360 * 5 + Math.floor(Math.random() * 360);
-
-    if (document.querySelector('.wheel')) {
-      const wheel = document.querySelector('.wheel');
-      wheel.style.transition = `transform ${duration}ms cubic-bezier(0.25, 0.1, 0.25, 1)`;
-      wheel.style.transform = `rotate(${totalRotation}deg)`;
-
-      setTimeout(() => {
-        wheel.style.transition = 'none';
-        wheel.style.transform = `rotate(${totalRotation % 360}deg)`;
-
-        const sliceAngle = 360 / dummyRestaurants.length;
-        const finalRotation = totalRotation % 360;
-        const winningIndex = Math.floor((finalRotation + (sliceAngle / 2)) / sliceAngle) % dummyRestaurants.length;
-
-        setWinningRestaurant(dummyRestaurants[winningIndex]);
-        setSpinning(false);
-      }, duration);
-    }
-  };
 
   const handlePopupClose = (confirm) => {
     document.getElementById('result-popup').style.display = 'none';
@@ -62,14 +28,15 @@ export default function Spinner() {
       const allUsers = await getAllUsers();
       setUsers(allUsers.filter(({ uid }) => uid !== user.uid));
 
-      const restaurantData = await Promise.all(
-        selectedRestaurants.map((id) => getSingleRestaurant(id)),
+      const selectedRestaurantData = JSON.parse(localStorage.getItem(`selectedRestaurants_${user.uid}`)) || [];
+      const restaurantObjects = await Promise.all(
+        selectedRestaurantData.map((id) => getSingleRestaurant(id)),
       );
-      setRestaurants(restaurantData);
+      setRestaurants(restaurantObjects);
     };
 
     fetchData();
-  }, [user, selectedRestaurants]);
+  }, [user]);
 
   const handleUserSelect = async (userId) => {
     const selected = users.find(({ uid }) => uid === userId);
@@ -104,7 +71,7 @@ export default function Spinner() {
           ))}
         </Dropdown.Menu>
       </Dropdown>
-      <RestaurantSpinner restaurants={restaurants} onSpin={handleSpin} />
+      <RestaurantSpinner restaurants={restaurants} onSpin={() => console.log('Spinning!')} />
 
       {winningRestaurant && (
         <div id="result-popup" className="popup">

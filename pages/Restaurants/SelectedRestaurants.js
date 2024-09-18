@@ -26,7 +26,7 @@ export default function SelectedRestaurants() {
                 }
                 console.error('Invalid restaurant ID:', data.restaurant);
                 return null;
-              }).filter(Boolean), // Remove any null values
+              }).filter(Boolean),
             );
             setRestaurants(restaurantDetails);
           } else {

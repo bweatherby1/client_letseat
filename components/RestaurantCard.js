@@ -18,7 +18,6 @@ const RestaurantCard = ({
         if (userUid) {
           const data = await getUserSelectedRestaurants(userUid);
 
-          // Ensure each item in data has the correct property
           const selectedIds = data.map((item) => item.restaurant);
 
           setIsSelected(selectedIds.includes(id));
