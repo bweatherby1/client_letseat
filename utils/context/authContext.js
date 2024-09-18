@@ -3,7 +3,6 @@ import React, {
 } from 'react';
 import { signOut, signInWithUsername } from '../auth';
 import { getSingleUser } from '../../.husky/apiData/UserData';
-// import { createSelectedRestaurant, deleteSelectedRestaurant } from '../../.husky/apiData/RestaurantData';
 
 const AuthContext = createContext();
 

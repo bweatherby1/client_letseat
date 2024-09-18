@@ -1,87 +1,94 @@
-import React, { useState, useEffect } from 'react';
-import { Dropdown, Button } from 'react-bootstrap';
+import React, { useEffect, useState, useRef } from 'react';
+import PropTypes from 'prop-types';
+import { Button, Image } from 'react-bootstrap';
+import { getUserSelectedRestaurants, getSingleRestaurant } from '../.husky/apiData/RestaurantData';
+import { getSingleUser } from '../.husky/apiData/UserData';
 import { useAuth } from '../utils/context/authContext';
-import { getAllUsers } from '../.husky/apiData/UserData';
-import { getSingleRestaurant } from '../.husky/apiData/RestaurantData';
-import RestaurantSpinner from '../components/RestaurantSpinner';
 
-export default function Spinner() {
-  const { user } = useAuth();
+const RestaurantSpinner = ({ onSpin }) => {
   const [restaurants, setRestaurants] = useState([]);
-  const [users, setUsers] = useState([]);
-  const [selectedUser, setSelectedUser] = useState(null);
-  const [winningRestaurant, setWinningRestaurant] = useState(null);
+  const wheelRef = useRef(null);
+  const { user } = useAuth();
+  const [rotation, setRotation] = useState(0);
 
-  const handlePopupClose = (confirm) => {
-    document.getElementById('result-popup').style.display = 'none';
-
-    if (confirm && winningRestaurant) {
-      window.location.href = `/restaurants/${winningRestaurant.id}`;
-    } else {
-      setRestaurants((prev) => prev.filter(({ id }) => id !== winningRestaurant.id));
-      setWinningRestaurant(null);
-    }
+  const handleSpin = () => {
+    const randomDegree = Math.floor(Math.random() * 360);
+    const totalRotation = rotation + 2880 + randomDegree; // Spin 8 times + random degree
+    setRotation(totalRotation);
+    wheelRef.current.style.transition = 'transform 4s cubic-bezier(0.42, 0, 0.58, 1)'; // Smooth transition
+    wheelRef.current.style.transform = `rotate(${totalRotation}deg)`;
+    if (onSpin) onSpin(); // Call the onSpin callback if needed
   };
 
   useEffect(() => {
-    const fetchData = async () => {
-      const allUsers = await getAllUsers();
-      setUsers(allUsers.filter(({ uid }) => uid !== user.uid));
-
-      const selectedRestaurantData = JSON.parse(localStorage.getItem(`selectedRestaurants_${user.uid}`)) || [];
-      const restaurantObjects = await Promise.all(
-        selectedRestaurantData.map((id) => getSingleRestaurant(id)),
-      );
-      setRestaurants(restaurantObjects);
+    const fetchRestaurants = async () => {
+      try {
+        if (user?.uid) {
+          const userData = await getSingleUser(user.uid);
+          if (userData && userData.uid) {
+            const selectedRestaurants = await getUserSelectedRestaurants(userData.uid);
+            if (selectedRestaurants && selectedRestaurants.length > 0) {
+              const restaurantDetails = await Promise.all(
+                selectedRestaurants.map(async (data) => {
+                  try {
+                    const restaurantId = data.restaurant;
+                    return await getSingleRestaurant(restaurantId);
+                  } catch (error) {
+                    console.error(`Error fetching details for restaurant ID ${data.restaurant}:`, error);
+                    return null;
+                  }
+                }),
+              );
+              setRestaurants(restaurantDetails.filter(Boolean));
+            } else {
+              setRestaurants([]);
+            }
+          } else {
+            console.error('Failed to retrieve valid user data');
+          }
+        } else {
+          console.error('User ID is undefined, cannot fetch restaurants');
+        }
+      } catch (error) {
+        console.error('Error fetching restaurants:', error);
+      }
     };
 
-    fetchData();
+    fetchRestaurants();
   }, [user]);
 
-  const handleUserSelect = async (userId) => {
-    const selected = users.find(({ uid }) => uid === userId);
-    setSelectedUser(selected);
-
-    const currentUserUid = user.uid;
-    const currentUserSelectedRestaurants = JSON.parse(localStorage.getItem(`selectedRestaurants_${currentUserUid}`)) || [];
-    const selectedUserRestaurants = JSON.parse(localStorage.getItem(`selectedRestaurants_${selected.uid}`)) || [];
-
-    const combinedRestaurantIds = [...new Set([...currentUserSelectedRestaurants, ...selectedUserRestaurants])];
-
-    const restaurantObjects = await Promise.all(
-      combinedRestaurantIds.map((id) => getSingleRestaurant(id)),
-    );
-
-    localStorage.setItem(`selectedRestaurants_${currentUserUid}`, JSON.stringify(combinedRestaurantIds));
-    setRestaurants(restaurantObjects);
-  };
-
   return (
-    <div className="container mt-5">
-      <h1 className="mb-4">Restaurant Spinner</h1>
-      <Dropdown className="mb-3">
-        <Dropdown.Toggle variant="success" id="dropdown-basic">
-          {selectedUser ? `Add ${selectedUser.name}'s restaurants` : 'Add another user\'s restaurants'}
-        </Dropdown.Toggle>
-        <Dropdown.Menu>
-          {users.map(({ uid, name }) => (
-            <Dropdown.Item key={uid} onClick={() => handleUserSelect(uid)}>
-              {name}
-            </Dropdown.Item>
+    <div className="spinner-container">
+      <div className="spinner">
+        <div className="spinner-wheel" ref={wheelRef}>
+          {restaurants.map((restaurant, index) => (
+            <div
+              key={restaurant.id}
+              className="spinner-slice"
+              style={{
+                transform: `rotate(${(360 / restaurants.length) * index}deg)`,
+              }}
+            >
+              <div className="spinner-slice-content" style={{ transform: `rotate(${-(360 / restaurants.length) * index}deg)` }}>
+                <Image src={restaurant.image_url} alt={restaurant.name} className="spinrestaurant-image" />
+                <div className="restaurant-name">{restaurant.name}</div>
+              </div>
+            </div>
           ))}
-        </Dropdown.Menu>
-      </Dropdown>
-      <RestaurantSpinner restaurants={restaurants} onSpin={() => console.log('Spinning!')} />
-
-      {winningRestaurant && (
-        <div id="result-popup" className="popup">
-          <div className="popup-content">
-            <p>{`It looks like ${winningRestaurant.name} is the place to be, but is it the place for you?`}</p>
-            <Button onClick={() => handlePopupClose(true)}>Yes</Button>
-            <Button onClick={() => handlePopupClose(false)}>No</Button>
-          </div>
         </div>
-      )}
+        <div id="peg" />
+        <Button id="button" onClick={handleSpin}>Spin</Button>
+      </div>
     </div>
   );
-}
+};
+
+RestaurantSpinner.propTypes = {
+  onSpin: PropTypes.func,
+};
+
+RestaurantSpinner.defaultProps = {
+  onSpin: () => {},
+};
+
+export default RestaurantSpinner;

@@ -184,7 +184,6 @@ input:checked + .slider:before {
   padding: 5px;
 }
 
-
 #peg {
   position: absolute;
   width: 20px;
@@ -214,6 +213,12 @@ input:checked + .slider:before {
   background: #79a339;
 }
 
+
+.dropdown-menu {
+  display: block !important; /* Ensure the dropdown menu is displayed */
+  position: absolute; /* Ensure it appears below the button */
+  z-index: 1000; /* Make sure it appears above other content */
+}
 
 
 
@@ -381,3 +386,4 @@ footer {
   .popup-content button:hover {
     background-color: #ddd;
   }
+  
