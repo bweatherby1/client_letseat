@@ -1,23 +1,28 @@
 import React, { useEffect, useState, useRef } from 'react';
 import PropTypes from 'prop-types';
-import { Button, Image } from 'react-bootstrap';
+import { Button } from 'react-bootstrap';
 import { getUserSelectedRestaurants, getSingleRestaurant } from '../.husky/apiData/RestaurantData';
 import { getSingleUser } from '../.husky/apiData/UserData';
 import { useAuth } from '../utils/context/authContext';
 
-const RestaurantSpinner = ({ onSpin }) => {
-  const [restaurants, setRestaurants] = useState([]);
+const RestaurantSpinner = ({ onSpin, restaurants, setRestaurants }) => {
   const wheelRef = useRef(null);
   const { user } = useAuth();
   const [rotation, setRotation] = useState(0);
 
   const handleSpin = () => {
     const randomDegree = Math.floor(Math.random() * 360);
-    const totalRotation = rotation + 2880 + randomDegree; // Spin 8 times + random degree
+    const totalRotation = rotation + 2880 + randomDegree;
     setRotation(totalRotation);
-    wheelRef.current.style.transition = 'transform 4s cubic-bezier(0.42, 0, 0.58, 1)'; // Smooth transition
+    wheelRef.current.style.transition = 'transform 4s cubic-bezier(0.25, 0.1, 0.25, 1)';
     wheelRef.current.style.transform = `rotate(${totalRotation}deg)`;
-    if (onSpin) onSpin(); // Call the onSpin callback if needed
+
+    setTimeout(() => {
+      const sliceAngle = 360 / restaurants.length;
+      const winningIndex = Math.floor(((360 - (totalRotation % 360)) % 360) / sliceAngle);
+      const winningRestaurant = restaurants[winningIndex];
+      if (onSpin) onSpin(winningRestaurant);
+    }, 4000);
   };
 
   useEffect(() => {
@@ -25,10 +30,8 @@ const RestaurantSpinner = ({ onSpin }) => {
       try {
         if (user?.uid) {
           const userData = await getSingleUser(user.uid);
-
           if (userData && userData.uid) {
             const selectedRestaurants = await getUserSelectedRestaurants(userData.uid);
-
             if (selectedRestaurants && selectedRestaurants.length > 0) {
               const restaurantDetails = await Promise.all(
                 selectedRestaurants.map(async (data) => {
@@ -41,7 +44,6 @@ const RestaurantSpinner = ({ onSpin }) => {
                   }
                 }),
               );
-
               setRestaurants(restaurantDetails.filter(Boolean));
             } else {
               setRestaurants([]);
@@ -58,29 +60,27 @@ const RestaurantSpinner = ({ onSpin }) => {
     };
 
     fetchRestaurants();
-  }, [user]);
+  }, [user, setRestaurants]);
 
   return (
     <div className="spinner-container">
       <div className="spinner">
-        <div className="spinner-wheel" ref={wheelRef}>
+        <ul className="spinner-list" ref={wheelRef} style={{ '--total-slices': restaurants.length }}>
           {restaurants.map((restaurant, index) => (
-            <div
+            <li
               key={restaurant.id}
               className="spinner-slice"
               style={{
-                transform: `rotate(${(360 / restaurants.length) * index}deg)`,
+                '--rotate': `${(360 / restaurants.length) * index}deg`,
+                '--slice-color': `hsl(${(360 / restaurants.length) * index}, 70%, 60%)`,
               }}
             >
-              <div className="spinner-slice-content" style={{ transform: `rotate(${-(360 / restaurants.length) * index}deg)` }}>
-                <Image src={restaurant.image_url} alt={restaurant.name} className="spinrestaurant-image" />
-                <div className="restaurant-name">{restaurant.name}</div>
-              </div>
-            </div>
+              <p className="spinner-slice-text">{restaurant.name}</p>
+            </li>
           ))}
-        </div>
-        <div id="peg" />
-        <Button id="button" onClick={handleSpin}>Spin</Button>
+        </ul>
+        <div className="spinner-pointer" />
+        <Button className="spin-button" onClick={handleSpin}>Spin</Button>
       </div>
     </div>
   );
@@ -88,6 +88,11 @@ const RestaurantSpinner = ({ onSpin }) => {
 
 RestaurantSpinner.propTypes = {
   onSpin: PropTypes.func,
+  restaurants: PropTypes.arrayOf(PropTypes.shape({
+    id: PropTypes.string.isRequired,
+    name: PropTypes.string.isRequired,
+  })).isRequired,
+  setRestaurants: PropTypes.func.isRequired,
 };
 
 RestaurantSpinner.defaultProps = {

@@ -118,108 +118,117 @@ input:checked + .slider:before {
 .slider.round:before {
   border-radius: 50%;
 }
+  .spinner-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+  }
 
-/* Spinner container */
-.spinner-container {
-  position: relative;
-  width: 300px; /* Adjust as needed */
-  height: 300px; /* Adjust as needed */
-  margin: auto;
-}
+  .spinner {
+    position: relative;
+    width: 500px;
+    height: 500px;
+  }
+    .spinner-list {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      border: 2px solid black;
+      position: relative;
+      overflow: hidden;
+      padding: 0;
+      margin: 0;
+      list-style: none;
+    }
 
-/* Spinner itself */
-.spinner {
-  position: relative;
-  width: 100%;
-  height: 100%;
-}
+    .spinner-slice {
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 50%;
+      height: 50%;
+      transform-origin: 0% 100%;
+      transform: rotate(var(--rotate));
+      overflow: hidden;
+    }
 
-/* Wheel of the spinner */
-.spinner-wheel {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  border-radius: 50%;
-  overflow: hidden; /* Hide anything outside the wheel */
-}
+    .spinner-slice:before {
+      content: "";
+      position: absolute;
+      top: -50%;
+      left: -100%;
+      width: 200%;
+      height: 200%;
+      background-color: var(--slice-color, #f0f0f0);
+      transform-origin: 50% 100%;
+      transform: skew(calc(var(--slice-angle) - 90deg));
+    }
 
-/* Each slice of the spinner */
-.spinner-slice {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  clip-path: polygon(50% 50%, 100% 0, 100% 100%); /* Adjust clip-path for proper slice shape */
-  overflow: hidden;
-}
+    .spinner-slice-text {
+      position: absolute;
+      left: 0;
+      top: 50%;
+      width: 50%;
+      height: 20px;
+      transform-origin: left center;
+      transform: rotate(calc(var(--slice-angle) / 2));
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      padding-left: 60px;
+      font-weight: bold;
+      font-size: 14px;
+      color: white;
+      z-index: 1;
+    }
+    
+    .spinner-pointer {
+    position: absolute;
+    top: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-left: 10px solid transparent;
+    border-right: 10px solid transparent;
+    border-top: 20px solid red;
+    z-index: 10;
+  }
 
-/* Content inside each slice */
-.spinner-slice-content {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  color: white; /* Ensure text is readable */
-  background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background for text visibility */
-}
+  .spin-button {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    z-index: 20;
+  }
 
-/* Restaurant image styling */
-.spinrestaurant-image {
-  width: 100%;
-  height: auto; /* Maintain aspect ratio */
-  object-fit: cover; /* Ensure image covers the space */
-}
+  .spin-button:hover {
+    background-color: #0056b3;
+  }
 
-/* Restaurant name styling */
-.restaurant-name {
-  position: absolute;
-  bottom: 10px; /* Adjust as needed */
-  width: 100%;
-  text-align: center;
-  font-size: 16px; /* Adjust size as needed */
-  background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background for text visibility */
-  color: white; /* Text color */
-  padding: 5px;
-}
-
-#peg {
-  position: absolute;
-  width: 20px;
-  height: 20px;
-  background-color: red;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -100%);
-  border-radius: 50%;
-  z-index: 2;
-}
-
-#button {
-  font-size: 24px;
-  border-radius: 10px;
-  width: 100px;
-  height: 60px;
-  color: white;
-  background: #89bd46;
-  border: none;
-  display: inline-block;
-  margin: 25px;
-  z-index: 3;
-}
-
-#button:hover, #button:focus {
-  background: #79a339;
-}
-
+  .spinner-slice:nth-child(6n+1):before { --slice-color: #a94fca; }
+  .spinner-slice:nth-child(6n+2):before { --slice-color: #EE4266; }
+  .spinner-slice:nth-child(6n+3):before { --slice-color: #FFD23F; }
+  .spinner-slice:nth-child(6n+4):before { --slice-color: #3BCEAC; }
+  .spinner-slice:nth-child(6n+5):before { --slice-color: #2765d4; }
+  .spinner-slice:nth-child(6n):before { --slice-color: #FF715B; }
 
 .dropdown-menu {
-  display: block !important; /* Ensure the dropdown menu is displayed */
-  position: absolute; /* Ensure it appears below the button */
-  z-index: 1000; /* Make sure it appears above other content */
+  display: block !important;
+  position: absolute;
+  z-index: 1000;
 }
-
 
 
 
