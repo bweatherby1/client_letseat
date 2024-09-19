@@ -30,13 +30,6 @@ ___
 <img width="450" alt="Screen Shot 2022-07-06 at 1 07 27 PM" src="https://user-images.githubusercontent.com/29741570/177615077-9b6a75bc-0260-4d29-bb88-bd95a3140687.png">
 
 
-You can start editing the page by modifying `pages/index.js`. The page auto-updates as you edit the file.
-
-**NOTES:** 
-
-
-
-
 
 ## LETS EAT!!
 Let's Eat is an application designed to solve the problem of where to eat in the simplest way possible, WITH A SPINNER!!!!
@@ -59,6 +52,7 @@ https://miro.com/app/board/uXjVKK0JvAU=/
 
 
 ## Deployed Link
+Currently not deployed as backend is also not deployed.
 
 
 ## Project Board
@@ -84,24 +78,17 @@ Users - [<img src="https://run.pstmn.io/button.svg" alt="Run In Postman" style="
 
 ## Tech Stack/contributions
 
-Python
+Python          React
 
-Django
+Django          Next.js
 
-Postman
+Postman         
 
 NSS BE Py/Django template
+NSS FE React/Next.js template
 
 ## Loom - Postman Documentation
 
 https://www.loom.com/share/49849ad36a314d1394f0e49b4aada101
 
-- If you see the following error, you did not follow all the setup steps correctly and failed to add your Firebase creds. Go back and do that NOW.
-
-<img width="1043" alt="Screen Shot 2022-07-06 at 11 18 45 AM" src="https://user-images.githubusercontent.com/29741570/177612501-c2628f18-4bbd-4de9-aae6-27ffba1172d6.png">
-        
-## Learn More about Next.js
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Loom - walkthrough
