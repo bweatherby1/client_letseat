@@ -19,10 +19,6 @@ const getAllRestaurants = () => new Promise((resolve, reject) => {
     .catch((error) => reject(error));
 });
 
-
-
-
-
 const getSingleRestaurant = (id) => new Promise((resolve, reject) => {
   fetch(`${endpoint}/restaurants/${id}`, {
     method: 'GET',
@@ -86,32 +82,115 @@ const deleteRestaurant = async (id) => {
   return true;
 };
 
-const toggleRestaurantSelection = async (restaurantId, userId) => {
-    const response = await fetch(`${clientCredentials.databaseURL}/selected_restaurant`, {
+// .husky/apiData/RestaurantData.js
+
+const createSelectedRestaurant = async (restaurantId, userId) => {
+  try {
+    const url = `${endpoint}/selected_restaurants`;
+    const data = { restaurant_id: restaurantId, user_uid: userId };
+    console.log('Creating selected restaurant with data:', data); // Log the data being sent
+    const response = await fetch(url, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ restaurant_id: restaurantId, user_id: userId }),
+      body: JSON.stringify(data),
     });
-    if (!response.ok) {
-      throw new Error('Failed to toggle restaurant selection');
-    }
-    return response.json();
-  };
 
-  const getUserRestaurants = async (userId) => {
-    const baseUrl = clientCredentials.databaseURL.replace(/"/g, '');
-    const response = await fetch(`${baseUrl}/restaurants/by_user?user=${userId}`);
-     
     if (!response.ok) {
-      throw new Error('Failed to fetch user restaurants');
+      throw new Error('Network response was not ok');
     }
-     
-    return response.json();
-  };
-  
-  
+
+    return await response.json();
+  } catch (error) {
+    console.error('Error creating selected restaurant:', error);
+    throw error;
+  }
+};
+
+const deleteSelectedRestaurant = async (restaurantId, userId) => {
+  try {
+    const url = `${endpoint}/selected_restaurants/${restaurantId}?user_uid=${userId}`;
+    const data = { restaurant_id: restaurantId, user_uid: userId };
+    console.log('Deleting selected restaurant with data:', data); // Log the data being sent
+    const response = await fetch(url, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+
+    if (!response.ok) {
+      throw new Error('Network response was not ok');
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Error deleting selected restaurant:', error);
+    throw error;
+  }
+};
+
+
+const getUserSelectedRestaurants = async (userId) => {
+  try {
+    const data = { user_uid: userId };
+    const response = await fetch(`${endpoint}/selected_restaurants/by_user?user_uid=${userId}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error('Network response was not ok');
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Error fetching selected restaurants:', error);
+    throw error;
+  }
+};
+
+const toggleSelectedRestaurant = async (restaurantId, userUid) => {
+  try {
+    console.log(userUid, restaurantId)
+    const url = `${endpoint}/selected_restaurants/toggle_selected_restaurant`;
+    const data = { restaurant_id: restaurantId, user_uid: userUid };
+
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+
+    if (!response.ok) {
+      throw new Error('Network response was not ok');
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Error toggling selected restaurant:', error);
+    throw error;
+  }
+};
+
+
+const getUserRestaurants = (userId) => new Promise((resolve, reject) => {
+  fetch(`${endpoint}/restaurants/by_user?user=${userId}`, {
+   method: 'Get',
+   headers: {
+    'Content-Type': 'application/json',
+   },
+  })
+  .then((response) => response.json())
+  .then((data) => resolve(data))
+  .catch(reject);
+});
 
 export {
   getAllRestaurants,
@@ -119,6 +198,9 @@ export {
   createRestaurant,
   updateRestaurant,
   deleteRestaurant,
-  toggleRestaurantSelection,
+  createSelectedRestaurant,
+  deleteSelectedRestaurant,
+  getUserSelectedRestaurants,
   getUserRestaurants,
+  toggleSelectedRestaurant,
 };

@@ -1,11 +1,10 @@
 import React from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import {
   Navbar,
   Container,
   Nav,
-  Button,
+  Button, Image,
 } from 'react-bootstrap';
 import { useAuth } from '../utils/context/authContext';
 
