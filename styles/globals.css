@@ -118,6 +118,32 @@ input:checked + .slider:before {
 .slider.round:before {
   border-radius: 50%;
 }
+.spinner-page-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 5vh;
+  min-height: 100vh;
+}
+  .spinner-content {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    width: 100%;
+    max-width: 1200px;
+    margin-top: 2rem;
+  }
+
+  .buttons-container {
+    margin-right: 4rem;
+    width: 250px;
+  }
+
+  .spinner-wrapper {
+    flex: 1;
+    max-width: 500px;
+    margin-top: -300px; /* Adjust this value as needed */
+  }
   .spinner-container {
     display: flex;
     justify-content: center;

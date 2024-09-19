@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Dropdown, Button, Modal } from 'react-bootstrap';
 import { useRouter } from 'next/router';
 import { useAuth } from '../utils/context/authContext';
@@ -14,6 +14,7 @@ export default function Spinner() {
   const [selectedUser, setSelectedUser] = useState(null);
   const [winningRestaurant, setWinningRestaurant] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  const dropdownRef = useRef(null);
 
   const handleSpinResult = (restaurant) => {
     setWinningRestaurant(restaurant);
@@ -24,7 +25,7 @@ export default function Spinner() {
     setShowModal(false);
 
     if (confirm && winningRestaurant) {
-      router.push(`/Restaurants/${winningRestaurant.id}`);
+      router.push(`/restaurants/${winningRestaurant.id}`);
     } else if (winningRestaurant) {
       setRestaurants((prev) => prev.filter(({ id }) => id !== winningRestaurant.id));
       setWinningRestaurant(null);
@@ -46,50 +47,67 @@ export default function Spinner() {
     fetchData();
   }, [user]);
 
-  const handleUserSelect = async (userId) => {
+  const handleUserSelect = (userId) => {
     const selected = users.find(({ uid }) => uid === userId);
     setSelectedUser(selected);
-
-    const currentUserUid = user.uid;
-    const currentUserSelectedRestaurants = JSON.parse(localStorage.getItem(`selectedRestaurants_${currentUserUid}`)) || [];
-    const selectedUserRestaurants = JSON.parse(localStorage.getItem(`selectedRestaurants_${selected.uid}`)) || [];
-
-    const combinedRestaurantIds = [...new Set([...currentUserSelectedRestaurants, ...selectedUserRestaurants])];
-
-    const restaurantObjects = await Promise.all(
-      combinedRestaurantIds.map((id) => getSingleRestaurant(id)),
-    );
-
-    localStorage.setItem(`selectedRestaurants_${currentUserUid}`, JSON.stringify(combinedRestaurantIds));
-    setRestaurants(restaurantObjects);
+    if (dropdownRef.current) {
+      dropdownRef.current.click(); // This should close the dropdown
+    }
   };
 
-  return (
-    <div className="container mt-5">
-      <h1 className="mb-4">Restaurant Spinner</h1>
-      <div className="d-flex flex-column align-items-center">
-        <Dropdown className="mb-3">
-          <Dropdown.Toggle variant="success" id="dropdown-basic">
-            {selectedUser ? `Add ${selectedUser.name}'s restaurants` : 'Add another user\'s restaurants'}
-          </Dropdown.Toggle>
-          <Dropdown.Menu>
-            {users.map(({ uid, name }) => (
-              <Dropdown.Item key={uid} onClick={() => handleUserSelect(uid)}>
-                {name}
-              </Dropdown.Item>
-            ))}
-          </Dropdown.Menu>
-        </Dropdown>
-        <RestaurantSpinner restaurants={restaurants} setRestaurants={setRestaurants} onSpin={handleSpinResult} />
-      </div>
+  const addSelectedUserRestaurants = async () => {
+    if (selectedUser) {
+      const currentUserUid = user.uid;
+      const currentUserSelectedRestaurants = JSON.parse(localStorage.getItem(`selectedRestaurants_${currentUserUid}`)) || [];
+      const selectedUserRestaurants = JSON.parse(localStorage.getItem(`selectedRestaurants_${selectedUser.uid}`)) || [];
 
-      <Modal show={showModal} onHide={() => handleModalClose(false)} centered style={{ top: '-25%' }}>
+      const combinedRestaurantIds = [...new Set([...currentUserSelectedRestaurants, ...selectedUserRestaurants])];
+
+      const restaurantObjects = await Promise.all(
+        combinedRestaurantIds.map((id) => getSingleRestaurant(id)),
+      );
+
+      localStorage.setItem(`selectedRestaurants_${currentUserUid}`, JSON.stringify(combinedRestaurantIds));
+      setRestaurants(restaurantObjects);
+    }
+  };
+  return (
+    <div className="spinner-page-container">
+      <h1 className="mb-4">Restaurant Spinner</h1>
+      <div className="spinner-content">
+        <div className="buttons-container">
+          <Button
+            variant="primary"
+            onClick={addSelectedUserRestaurants}
+            disabled={!selectedUser}
+            className="mb-3 d-block"
+          >
+            Add {selectedUser ? `${selectedUser.name}'s` : ''} restaurants
+          </Button>
+          <Dropdown className="mb-3 w-100">
+            <Dropdown.Toggle ref={dropdownRef} variant="success" id="dropdown-basic">
+              {selectedUser ? `${selectedUser.name}` : 'Select a user'}
+            </Dropdown.Toggle>
+            <Dropdown.Menu>
+              {users.map(({ uid, name }) => (
+                <Dropdown.Item key={uid} onClick={() => handleUserSelect(uid)}>
+                  {name}
+                </Dropdown.Item>
+              ))}
+            </Dropdown.Menu>
+          </Dropdown>
+        </div>
+        <div className="spinner-wrapper">
+          <RestaurantSpinner restaurants={restaurants} setRestaurants={setRestaurants} onSpin={handleSpinResult} />
+        </div>
+      </div>
+      <Modal show={showModal} onHide={() => handleModalClose(false)} centered>
         <Modal.Header closeButton>
           <Modal.Title>Spin Result</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           {winningRestaurant && (
-            <p>{`It looks like ${winningRestaurant.name} is the place to be, but is it the place for you?`}</p>
+          <p>{`It looks like ${winningRestaurant.name} is the place to be, but is it the place for you?`}</p>
           )}
         </Modal.Body>
         <Modal.Footer>
