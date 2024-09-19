@@ -26,13 +26,15 @@ const RestaurantSpinner = ({ onSpin, restaurants, setRestaurants }) => {
   };
 
   useEffect(() => {
+    let isMounted = true;
+
     const fetchRestaurants = async () => {
       try {
         if (user?.uid) {
           const userData = await getSingleUser(user.uid);
           if (userData && userData.uid) {
             const selectedRestaurants = await getUserSelectedRestaurants(userData.uid);
-            if (selectedRestaurants && selectedRestaurants.length > 0) {
+            if (isMounted && selectedRestaurants && selectedRestaurants.length > 0) {
               const restaurantDetails = await Promise.all(
                 selectedRestaurants.map(async (data) => {
                   try {
@@ -44,22 +46,26 @@ const RestaurantSpinner = ({ onSpin, restaurants, setRestaurants }) => {
                   }
                 }),
               );
-              setRestaurants(restaurantDetails.filter(Boolean));
-            } else {
+              if (isMounted) {
+                setRestaurants(restaurantDetails.filter(Boolean));
+              }
+            } else if (isMounted) {
               setRestaurants([]);
             }
-          } else {
-            console.error('Failed to retrieve valid user data');
           }
-        } else {
-          console.error('User ID is undefined, cannot fetch restaurants');
         }
       } catch (error) {
-        console.error('Error fetching restaurants:', error);
+        if (isMounted) {
+          console.error('Error fetching restaurants:', error);
+        }
       }
     };
 
     fetchRestaurants();
+
+    return () => {
+      isMounted = false; // Cleanup to prevent state updates after unmount
+    };
   }, [user, setRestaurants]);
 
   return (
