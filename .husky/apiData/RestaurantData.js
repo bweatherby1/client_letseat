@@ -32,9 +32,12 @@ const getSingleRestaurant = (id) => new Promise((resolve, reject) => {
       }
       return response.json();
     })
-    .then((data) => resolve(data))
+    .then((data) => {
+      resolve(data);
+    })
     .catch((error) => reject(error));
 });
+
 
 const createRestaurant = (restaurant) => new Promise((resolve, reject) => {
   fetch(`${endpoint}/restaurants`, {
@@ -156,7 +159,6 @@ const getUserSelectedRestaurants = async (userId) => {
 
 const toggleSelectedRestaurant = async (restaurantId, userUid) => {
   try {
-    console.log(userUid, restaurantId)
     const url = `${endpoint}/selected_restaurants/toggle_selected_restaurant`;
     const data = { restaurant_id: restaurantId, user_uid: userUid };
 
