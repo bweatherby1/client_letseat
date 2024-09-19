@@ -78,13 +78,14 @@ Users - [<img src="https://run.pstmn.io/button.svg" alt="Run In Postman" style="
 
 ## Tech Stack/contributions
 
-Python    React
+Python                      React
 
-Django    Next.js
+Django                      Next.js
 
 Postman         
 
 NSS BE Py/Django template
+
 NSS FE React/Next.js template
 
 ## Loom - Postman Documentation
