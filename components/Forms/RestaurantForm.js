@@ -17,7 +17,17 @@ export default function RestaurantForm({ onSubmit, initialData = {} }) {
   const [categories, setCategories] = useState([]);
 
   useEffect(() => {
-    getAllCategories().then(setCategories);
+    let isMounted = true;
+
+    getAllCategories().then((categoriesData) => {
+      if (isMounted) {
+        setCategories(categoriesData);
+      }
+    });
+
+    return () => {
+      isMounted = false; // Cleanup function
+    };
   }, []);
 
   const handleChange = (e) => {

@@ -131,24 +131,25 @@ export default function Spinner() {
           <RestaurantSpinner restaurants={restaurants} setRestaurants={setRestaurants} onSpin={handleSpinResult} />
         </div>
       </div>
-      <Modal show={showModal} onHide={() => handleModalClose(false)} centered>
-        <Modal.Header closeButton>
-          <Modal.Title>Spin Result</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          {winningRestaurant && (
+      {/* Ensure the modal is only shown when winningRestaurant is not null */}
+      {winningRestaurant && (
+        <Modal show={showModal} onHide={() => handleModalClose(false)} centered>
+          <Modal.Header closeButton>
+            <Modal.Title>Spin Result</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
             <p>{`It looks like ${winningRestaurant.name} is the place to be, but is it the place for you?`}</p>
-          )}
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={() => handleModalClose(false)}>
-            No
-          </Button>
-          <Button variant="primary" onClick={() => handleModalClose(true)}>
-            Yes
-          </Button>
-        </Modal.Footer>
-      </Modal>
+          </Modal.Body>
+          <Modal.Footer>
+            <Button variant="secondary" onClick={() => handleModalClose(false)}>
+              No
+            </Button>
+            <Button variant="primary" onClick={() => handleModalClose(true)}>
+              Yes
+            </Button>
+          </Modal.Footer>
+        </Modal>
+      )}
     </div>
   );
 }

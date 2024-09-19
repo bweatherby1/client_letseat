@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/router';
 import { Image, Button, Modal } from 'react-bootstrap';
 import { getSingleRestaurant, deleteRestaurant } from '../../.husky/apiData/RestaurantData';
@@ -12,21 +12,31 @@ export default function RestaurantDetails() {
   const router = useRouter();
   const { id } = router.query;
   const { user } = useAuth();
+  const isMounted = useRef(true); // Track whether the component is mounted
 
   useEffect(() => {
+    isMounted.current = true; // Set to true when component is mounted
+
     if (id) {
       getSingleRestaurant(id)
         .then(async (restaurantData) => {
           const categoryData = await getSingleCategory(restaurantData.category);
-          setRestaurant({ ...restaurantData, category: categoryData });
+          if (isMounted.current) {
+            setRestaurant({ ...restaurantData, category: categoryData });
 
-          if (user && user.uid) {
-            setIsCreator(restaurantData.user === user.uid);
+            if (user && user.uid) {
+              setIsCreator(restaurantData.user === user.uid);
+            }
           }
         })
         .catch(() => {
+          // Handle errors if needed
         });
     }
+
+    return () => {
+      isMounted.current = false; // Cleanup function to mark component as unmounted
+    };
   }, [id, user]);
 
   const isSelected = user && user.selectedRestaurants ? user.selectedRestaurants.includes(Number(id)) : false;

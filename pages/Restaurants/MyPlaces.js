@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Container, Row, Col } from 'react-bootstrap';
 import { useAuth } from '../../utils/context/authContext';
 import RestaurantCard from '../../components/RestaurantCard';
@@ -7,11 +7,22 @@ import { getUserRestaurants } from '../../.husky/apiData/RestaurantData';
 export default function MyPlaces() {
   const [myRestaurants, setMyRestaurants] = useState([]);
   const { user } = useAuth();
+  const isMounted = useRef(true);
 
   useEffect(() => {
+    isMounted.current = true; // Set to true when component is mounted
+
     if (user && user.uid) {
-      getUserRestaurants(user.uid).then(setMyRestaurants);
+      getUserRestaurants(user.uid).then((restaurants) => {
+        if (isMounted.current) {
+          setMyRestaurants(restaurants); // Only update state if component is still mounted
+        }
+      });
     }
+
+    return () => {
+      isMounted.current = false; // Cleanup function to mark component as unmounted
+    };
   }, [user]);
 
   return (
@@ -31,7 +42,11 @@ export default function MyPlaces() {
                 city={restaurant.city}
                 state={restaurant.state}
                 zipCode={restaurant.zip_code}
-                onUpdate={() => getUserRestaurants(user.uid).then(setMyRestaurants)}
+                onUpdate={() => {
+                  if (isMounted.current) {
+                    getUserRestaurants(user.uid).then(setMyRestaurants);
+                  }
+                }}
               />
             </Col>
           ))}
