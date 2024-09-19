@@ -1,4 +1,6 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, {
+  useEffect, useState, useCallback, useRef,
+} from 'react';
 import PropTypes from 'prop-types';
 import Link from 'next/link';
 import { Button, Image } from 'react-bootstrap';
@@ -6,21 +8,23 @@ import { useAuth } from '../utils/context/authContext';
 import { getUserSelectedRestaurants, toggleSelectedRestaurant } from '../.husky/apiData/RestaurantData';
 
 const RestaurantCard = ({
-  id, name, imageUrl, streetAddress, city, state, zipCode,
+  id, name, imageUrl, streetAddress, city, state, zipCode, onToggleOff,
 }) => {
+  const mountedRef = useRef(true);
   const { user } = useAuth();
   const userUid = user?.uid;
   const [isSelected, setIsSelected] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  // Fetch selected restaurants and set the initial state
   useEffect(() => {
     const fetchSelectedRestaurants = async () => {
       if (userUid) {
         try {
           const data = await getUserSelectedRestaurants(userUid);
-          const selectedIds = data.map((item) => item.restaurant);
-          setIsSelected(selectedIds.includes(id));
+          if (mountedRef.current) {
+            const selectedIds = data.map((item) => item.restaurant);
+            setIsSelected(selectedIds.includes(id));
+          }
         } catch (error) {
           console.error('Error fetching selected restaurants:', error);
         }
@@ -28,26 +32,34 @@ const RestaurantCard = ({
     };
 
     fetchSelectedRestaurants();
+
+    return () => {
+      mountedRef.current = false;
+    };
   }, [userUid, id]);
 
   const handleToggle = useCallback(async (event) => {
-    if (loading) {
-      return; // Prevent multiple requests
-    }
+    if (loading) return;
 
     const newValue = event.target.checked;
-
-    setLoading(true); // Set loading to true to prevent multiple requests
+    setLoading(true);
 
     try {
-      await toggleSelectedRestaurant(id, userUid); // Pass id and userUid here
-      setIsSelected(newValue); // Update the local state
+      await toggleSelectedRestaurant(id, userUid);
+      if (mountedRef.current) {
+        setIsSelected(newValue);
+        if (!newValue && onToggleOff) {
+          onToggleOff(id);
+        }
+      }
     } catch (error) {
       console.error('Error toggling restaurant selection:', error);
     } finally {
-      setLoading(false); // Reset loading state after request
+      if (mountedRef.current) {
+        setLoading(false);
+      }
     }
-  }, [id, userUid, loading]); // Include userUid in dependencies
+  }, [id, userUid, loading, onToggleOff]);
 
   const googleMapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${streetAddress}, ${city}, ${state} ${zipCode}`)}`;
 
@@ -70,7 +82,7 @@ const RestaurantCard = ({
         />
         <span className="slider round" aria-label={`Select ${name}`} />
       </label>
-      <Link href={`/restaurants/${id}`} passHref>
+      <Link href={`/Restaurants/${id}`} passHref>
         <Button variant="primary">View Details</Button>
       </Link>
     </div>
@@ -85,6 +97,11 @@ RestaurantCard.propTypes = {
   city: PropTypes.string.isRequired,
   state: PropTypes.string.isRequired,
   zipCode: PropTypes.string.isRequired,
+  onToggleOff: PropTypes.func,
+};
+
+RestaurantCard.defaultProps = {
+  onToggleOff: null,
 };
 
 export default RestaurantCard;

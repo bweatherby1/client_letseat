@@ -6,42 +6,46 @@ import RestaurantCard from '../../components/RestaurantCard';
 import { getUserSelectedRestaurants, getSingleRestaurant } from '../../.husky/apiData/RestaurantData';
 
 export default function SelectedRestaurants() {
-  const { user } = useAuth(); // Get user from context
+  const { user } = useAuth();
   const [restaurants, setRestaurants] = useState([]);
   const router = useRouter();
 
   useEffect(() => {
+    let isMounted = true;
+
     const fetchSelectedRestaurants = async () => {
       if (user && user.uid) {
-        try {
-          const selectedRestaurantData = await getUserSelectedRestaurants(user.uid);
+        const selectedRestaurantData = await getUserSelectedRestaurants(user.uid);
 
-          if (selectedRestaurantData && selectedRestaurantData.length > 0) {
-            // Fetch restaurant details for each selected restaurant
-            const restaurantDetails = await Promise.all(
-              selectedRestaurantData.map((data) => {
-                // Use 'data.restaurant' for the restaurant ID
-                if (data.restaurant) {
-                  return getSingleRestaurant(data.restaurant);
-                }
-                console.error('Invalid restaurant ID:', data.restaurant);
-                return null;
-              }).filter(Boolean),
-            );
+        if (isMounted && selectedRestaurantData && selectedRestaurantData.length > 0) {
+          const restaurantDetails = await Promise.all(
+            selectedRestaurantData.map((data) => {
+              if (data.restaurant) {
+                return getSingleRestaurant(data.restaurant);
+              }
+              return null;
+            }).filter(Boolean),
+          );
+          if (isMounted) {
             setRestaurants(restaurantDetails);
-          } else {
-            setRestaurants([]);
           }
-        } catch (error) {
-          console.error('Error fetching selected restaurants:', error);
+        } else if (isMounted) {
+          setRestaurants([]);
         }
-      } else {
-        console.error('User not authenticated or user.uid is missing');
       }
     };
 
     fetchSelectedRestaurants();
+
+    return () => {
+      isMounted = false;
+    };
   }, [user]);
+
+  // Function to remove a restaurant from the list when it's toggled off
+  const handleRemoveRestaurant = (restaurantId) => {
+    setRestaurants((prevRestaurants) => prevRestaurants.filter((restaurant) => restaurant.id !== restaurantId));
+  };
 
   const handleSpinnerClick = () => {
     router.push('/Spinner');
@@ -62,6 +66,7 @@ export default function SelectedRestaurants() {
               city={restaurant.city}
               state={restaurant.state}
               zipCode={restaurant.zip_code}
+              onToggleOff={handleRemoveRestaurant}
             />
           </Col>
         ))}

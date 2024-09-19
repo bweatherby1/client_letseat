@@ -89,7 +89,7 @@ const RestaurantSpinner = ({ onSpin, restaurants, setRestaurants }) => {
 RestaurantSpinner.propTypes = {
   onSpin: PropTypes.func,
   restaurants: PropTypes.arrayOf(PropTypes.shape({
-    id: PropTypes.string.isRequired,
+    id: PropTypes.number.isRequired,
     name: PropTypes.string.isRequired,
   })).isRequired,
   setRestaurants: PropTypes.func.isRequired,

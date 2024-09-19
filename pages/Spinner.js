@@ -3,7 +3,7 @@ import { Dropdown, Button, Modal } from 'react-bootstrap';
 import { useRouter } from 'next/router';
 import { useAuth } from '../utils/context/authContext';
 import { getAllUsers } from '../.husky/apiData/UserData';
-import { getSingleRestaurant } from '../.husky/apiData/RestaurantData';
+import { getSingleRestaurant, getUserSelectedRestaurants } from '../.husky/apiData/RestaurantData';
 import RestaurantSpinner from '../components/RestaurantSpinner';
 
 export default function Spinner() {
@@ -15,6 +15,72 @@ export default function Spinner() {
   const [winningRestaurant, setWinningRestaurant] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const dropdownRef = useRef(null);
+  const isMounted = useRef(true);
+
+  useEffect(() => {
+    isMounted.current = true;
+
+    const fetchData = async () => {
+      try {
+        const allUsers = await getAllUsers();
+        if (isMounted.current) {
+          setUsers(allUsers.filter(({ uid }) => uid !== user.uid));
+
+          const selectedRestaurantData = JSON.parse(localStorage.getItem(`selectedRestaurants_${user.uid}`)) || [];
+
+          const restaurantObjects = await Promise.all(
+            selectedRestaurantData.map((restaurant) => getSingleRestaurant(restaurant)),
+          );
+          if (isMounted.current) {
+            setRestaurants(restaurantObjects.filter(Boolean));
+          }
+        }
+      } catch (error) {
+        // Error handling can be added if necessary
+      }
+    };
+
+    fetchData();
+
+    return () => {
+      isMounted.current = false;
+    };
+  }, [user]);
+
+  const handleUserSelect = (userId) => {
+    const selected = users.find(({ uid }) => uid === userId);
+    setSelectedUser(selected);
+    if (dropdownRef.current) {
+      dropdownRef.current.click();
+    }
+  };
+
+  const addSelectedUserRestaurants = async () => {
+    if (selectedUser) {
+      try {
+        const currentUserUid = user.uid;
+        const selectedUserUid = selectedUser.uid;
+
+        const currentUserSelectedRestaurants = await getUserSelectedRestaurants(currentUserUid);
+        const selectedUserRestaurants = await getUserSelectedRestaurants(selectedUserUid);
+
+        const combinedRestaurantIdentifiers = [...new Set([
+          ...currentUserSelectedRestaurants.map((restaurant) => restaurant.restaurant),
+          ...selectedUserRestaurants.map((restaurant) => restaurant.restaurant),
+        ])];
+
+        const restaurantObjects = await Promise.all(
+          combinedRestaurantIdentifiers.map((restaurantId) => getSingleRestaurant(restaurantId)),
+        );
+
+        if (isMounted.current) {
+          setRestaurants(restaurantObjects.filter(Boolean));
+        }
+      } catch (error) {
+        // Error handling can be added if necessary
+      }
+    }
+  };
 
   const handleSpinResult = (restaurant) => {
     setWinningRestaurant(restaurant);
@@ -25,52 +91,16 @@ export default function Spinner() {
     setShowModal(false);
 
     if (confirm && winningRestaurant) {
-      router.push(`/restaurants/${winningRestaurant.id}`);
+      router.push(`/Restaurants/${winningRestaurant.id}`);
     } else if (winningRestaurant) {
-      setRestaurants((prev) => prev.filter(({ id }) => id !== winningRestaurant.id));
+      setRestaurants((prev) => {
+        const filteredRestaurants = prev.filter((rest) => rest.id !== winningRestaurant.id);
+        return filteredRestaurants;
+      });
       setWinningRestaurant(null);
     }
   };
 
-  useEffect(() => {
-    const fetchData = async () => {
-      const allUsers = await getAllUsers();
-      setUsers(allUsers.filter(({ uid }) => uid !== user.uid));
-
-      const selectedRestaurantData = JSON.parse(localStorage.getItem(`selectedRestaurants_${user.uid}`)) || [];
-      const restaurantObjects = await Promise.all(
-        selectedRestaurantData.map((id) => getSingleRestaurant(id)),
-      );
-      setRestaurants(restaurantObjects);
-    };
-
-    fetchData();
-  }, [user]);
-
-  const handleUserSelect = (userId) => {
-    const selected = users.find(({ uid }) => uid === userId);
-    setSelectedUser(selected);
-    if (dropdownRef.current) {
-      dropdownRef.current.click(); // This should close the dropdown
-    }
-  };
-
-  const addSelectedUserRestaurants = async () => {
-    if (selectedUser) {
-      const currentUserUid = user.uid;
-      const currentUserSelectedRestaurants = JSON.parse(localStorage.getItem(`selectedRestaurants_${currentUserUid}`)) || [];
-      const selectedUserRestaurants = JSON.parse(localStorage.getItem(`selectedRestaurants_${selectedUser.uid}`)) || [];
-
-      const combinedRestaurantIds = [...new Set([...currentUserSelectedRestaurants, ...selectedUserRestaurants])];
-
-      const restaurantObjects = await Promise.all(
-        combinedRestaurantIds.map((id) => getSingleRestaurant(id)),
-      );
-
-      localStorage.setItem(`selectedRestaurants_${currentUserUid}`, JSON.stringify(combinedRestaurantIds));
-      setRestaurants(restaurantObjects);
-    }
-  };
   return (
     <div className="spinner-page-container">
       <h1 className="mb-4">Restaurant Spinner</h1>
@@ -107,7 +137,7 @@ export default function Spinner() {
         </Modal.Header>
         <Modal.Body>
           {winningRestaurant && (
-          <p>{`It looks like ${winningRestaurant.name} is the place to be, but is it the place for you?`}</p>
+            <p>{`It looks like ${winningRestaurant.name} is the place to be, but is it the place for you?`}</p>
           )}
         </Modal.Body>
         <Modal.Footer>

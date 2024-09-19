@@ -8,22 +8,22 @@ import { getAllRestaurants } from '../../.husky/apiData/RestaurantData';
 
 export default function All() {
   const [restaurants, setRestaurants] = useState([]);
-  const [error, setError] = useState(null);
   const router = useRouter();
 
   useEffect(() => {
+    let isMounted = true;
+
     getAllRestaurants()
       .then((data) => {
-        setRestaurants(data);
-      })
-      .catch((err) => {
-        console.error('Error fetching restaurants:', err);
-        setError(err.message);
+        if (isMounted) {
+          setRestaurants(data);
+        }
       });
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
-
-  if (error) return <div>Error: {error}</div>;
-
   return (
     <Container>
       <h1 className="text-center my-4">All Restaurants</h1>

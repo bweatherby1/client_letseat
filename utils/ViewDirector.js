@@ -1,4 +1,5 @@
 import PropTypes from 'prop-types';
+import { useRouter } from 'next/router';
 import { useAuth } from './context/authContext';
 import Loading from '../components/Loading';
 import Signin from '../components/Signin';
@@ -9,6 +10,9 @@ import UserForm from '../components/Forms/UserForm';
 
 const ViewDirectorBasedOnUserAuthStatus = ({ component: Component, pageProps }) => {
   const { user, userLoading, updateUser } = useAuth();
+  const router = useRouter();
+  const isHomePage = router.pathname === '/';
+  const isSpinnerPage = router.pathname === '/Spinner';
 
   if (userLoading) {
     return <Loading />;
@@ -17,8 +21,10 @@ const ViewDirectorBasedOnUserAuthStatus = ({ component: Component, pageProps }) 
   if (user) {
     return (
       <>
-        <Header />
-        <NavBar /> {/* NavBar only visible if user is logged in and is in every view */}
+        {/* Render Header on all pages except the Home and Spinner pages */}
+        {!isHomePage && !isSpinnerPage && <Header />}
+        {/* Render NavBar on all pages except the Home and Spinner pages */}
+        {!isHomePage && <NavBar />}
         <div className="container">
           {user.bio === null ? (
             <UserForm user={user} onSubmit={updateUser} />
@@ -26,7 +32,8 @@ const ViewDirectorBasedOnUserAuthStatus = ({ component: Component, pageProps }) 
             <Component {...pageProps} />
           )}
         </div>
-        <Footer />
+        {/* Render Footer on all pages except the Home and Spinner pages */}
+        {!isHomePage && !isSpinnerPage && <Footer />}
       </>
     );
   }
@@ -34,9 +41,14 @@ const ViewDirectorBasedOnUserAuthStatus = ({ component: Component, pageProps }) 
   return <Signin />;
 };
 
-export default ViewDirectorBasedOnUserAuthStatus;
-
 ViewDirectorBasedOnUserAuthStatus.propTypes = {
   component: PropTypes.func.isRequired,
   pageProps: PropTypes.oneOfType([PropTypes.object]).isRequired,
+  hideNavAndFooter: PropTypes.bool,
 };
+
+ViewDirectorBasedOnUserAuthStatus.defaultProps = {
+  hideNavAndFooter: false,
+};
+
+export default ViewDirectorBasedOnUserAuthStatus;
