@@ -1,6 +1,7 @@
 import React, {
   useEffect, useState, useCallback, useRef,
 } from 'react';
+import { useRouter } from 'next/router';
 import PropTypes from 'prop-types';
 import Link from 'next/link';
 import { Button, Image } from 'react-bootstrap';
@@ -12,15 +13,15 @@ const RestaurantCard = ({
 }) => {
   const mountedRef = useRef(true);
   const { user } = useAuth();
-  const userUid = user?.uid;
+  const router = useRouter();
   const [isSelected, setIsSelected] = useState(false);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const fetchSelectedRestaurants = async () => {
-      if (userUid) {
+      if (user?.uid) {
         try {
-          const data = await getUserSelectedRestaurants(userUid);
+          const data = await getUserSelectedRestaurants(user.uid);
           if (mountedRef.current) {
             const selectedIds = data.map((item) => item.restaurant);
             setIsSelected(selectedIds.includes(id));
@@ -36,26 +37,21 @@ const RestaurantCard = ({
     return () => {
       mountedRef.current = false;
     };
-  }, [userUid, id]);
+  }, [user?.uid, id]);
 
   const handleToggle = useCallback(async (event) => {
     if (loading) return;
 
+    if (!user?.uid) {
+      router.push('/'); // Redirect to home/signin page
+      return;
+    }
+
     const newValue = event.target.checked;
     setLoading(true);
 
-    // Add detailed logging
-    console.warn('Toggle initiated:', {
-      restaurantId: id,
-      userUid,
-      newValue,
-      endpoint: `${process.env.NEXT_PUBLIC_DATABASE_URL}/selected_restaurants/toggle_selected_restaurant`,
-    });
-
     try {
-      const response = await toggleSelectedRestaurant(id, userUid);
-      console.warn('Toggle response:', response);
-
+      await toggleSelectedRestaurant(id, user.uid);
       if (mountedRef.current) {
         setIsSelected(newValue);
         if (!newValue && onToggleOff) {
@@ -65,7 +61,7 @@ const RestaurantCard = ({
     } catch (error) {
       console.error('Toggle failed:', {
         error: error.message,
-        userUid,
+        userId: user.uid,
         restaurantId: id,
       });
     } finally {
@@ -73,7 +69,8 @@ const RestaurantCard = ({
         setLoading(false);
       }
     }
-  }, [id, userUid, loading, onToggleOff]);
+  }, [id, user?.uid, loading, onToggleOff, router]);
+
   const googleMapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${streetAddress}, ${city}, ${state} ${zipCode}`)}`;
 
   return (
@@ -100,8 +97,7 @@ const RestaurantCard = ({
       </Link>
     </div>
   );
-};
-RestaurantCard.propTypes = {
+}; RestaurantCard.propTypes = {
   id: PropTypes.number.isRequired,
   name: PropTypes.string.isRequired,
   imageUrl: PropTypes.string.isRequired,
