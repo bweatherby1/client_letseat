@@ -45,7 +45,8 @@ const RestaurantCard = ({
     setLoading(true);
 
     try {
-      await toggleSelectedRestaurant(id, userUid);
+      const response = await toggleSelectedRestaurant(id, userUid);
+      console.warn('Toggle response:', response);
       if (mountedRef.current) {
         setIsSelected(newValue);
         if (!newValue && onToggleOff) {
