@@ -1,7 +1,6 @@
 import React, {
   useEffect, useState, useCallback, useRef,
 } from 'react';
-import { useRouter } from 'next/router';
 import PropTypes from 'prop-types';
 import Link from 'next/link';
 import { Button, Image } from 'react-bootstrap';
@@ -16,7 +15,6 @@ const RestaurantCard = ({
   const userUid = user?.uid;
   const [isSelected, setIsSelected] = useState(false);
   const [loading, setLoading] = useState(false);
-  const router = useRouter();
 
   useEffect(() => {
     const fetchSelectedRestaurants = async () => {
@@ -46,19 +44,17 @@ const RestaurantCard = ({
     const newValue = event.target.checked;
     setLoading(true);
 
-    try {
-      // Add authentication check
-      if (!userUid) {
-        throw new Error('User not authenticated');
-      }
+    // Add detailed logging
+    console.warn('Toggle initiated:', {
+      restaurantId: id,
+      userUid,
+      newValue,
+      endpoint: `${process.env.NEXT_PUBLIC_DATABASE_URL}/selected_restaurants/toggle_selected_restaurant`,
+    });
 
+    try {
       const response = await toggleSelectedRestaurant(id, userUid);
-      console.warn('Server Response:', {
-        status: response.status,
-        data: response,
-        userId: userUid,
-        restaurantId: id,
-      });
+      console.warn('Toggle response:', response);
 
       if (mountedRef.current) {
         setIsSelected(newValue);
@@ -67,25 +63,17 @@ const RestaurantCard = ({
         }
       }
     } catch (error) {
-      console.error('Toggle Error Details:', {
-        status: error.response?.status,
-        message: error.message,
-        endpoint: `${process.env.NEXT_PUBLIC_DATABASE_URL}/selected_restaurants/toggle_selected_restaurant`,
-        userId: userUid,
+      console.error('Toggle failed:', {
+        error: error.message,
+        userUid,
         restaurantId: id,
-        authState: !!user,
       });
-
-      // Redirect to login if user is not authenticated
-      if (!userUid) {
-        router.push('/login');
-      }
     } finally {
       if (mountedRef.current) {
         setLoading(false);
       }
     }
-  }, [id, userUid, loading, onToggleOff, user, router]);
+  }, [id, userUid, loading, onToggleOff]);
   const googleMapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${streetAddress}, ${city}, ${state} ${zipCode}`)}`;
 
   return (
