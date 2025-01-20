@@ -1,6 +1,7 @@
 import React, {
   useEffect, useState, useCallback, useRef,
 } from 'react';
+import { useRouter } from 'next/router';
 import PropTypes from 'prop-types';
 import Link from 'next/link';
 import { Button, Image } from 'react-bootstrap';
@@ -15,6 +16,7 @@ const RestaurantCard = ({
   const userUid = user?.uid;
   const [isSelected, setIsSelected] = useState(false);
   const [loading, setLoading] = useState(false);
+  const router = useRouter();
 
   useEffect(() => {
     const fetchSelectedRestaurants = async () => {
@@ -45,12 +47,17 @@ const RestaurantCard = ({
     setLoading(true);
 
     try {
-      // Add response logging
+      // Add authentication check
+      if (!userUid) {
+        throw new Error('User not authenticated');
+      }
+
       const response = await toggleSelectedRestaurant(id, userUid);
       console.warn('Server Response:', {
         status: response.status,
         data: response,
-        endpoint: `${process.env.NEXT_PUBLIC_DATABASE_URL}/selected_restaurants/toggle_selected_restaurant`,
+        userId: userUid,
+        restaurantId: id,
       });
 
       if (mountedRef.current) {
@@ -60,20 +67,25 @@ const RestaurantCard = ({
         }
       }
     } catch (error) {
-      // Enhanced error logging
       console.error('Toggle Error Details:', {
         status: error.response?.status,
         message: error.message,
         endpoint: `${process.env.NEXT_PUBLIC_DATABASE_URL}/selected_restaurants/toggle_selected_restaurant`,
         userId: userUid,
         restaurantId: id,
+        authState: !!user,
       });
+
+      // Redirect to login if user is not authenticated
+      if (!userUid) {
+        router.push('/login');
+      }
     } finally {
       if (mountedRef.current) {
         setLoading(false);
       }
     }
-  }, [id, userUid, loading, onToggleOff]);
+  }, [id, userUid, loading, onToggleOff, user, router]);
   const googleMapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${streetAddress}, ${city}, ${state} ${zipCode}`)}`;
 
   return (
@@ -101,7 +113,6 @@ const RestaurantCard = ({
     </div>
   );
 };
-
 RestaurantCard.propTypes = {
   id: PropTypes.number.isRequired,
   name: PropTypes.string.isRequired,
