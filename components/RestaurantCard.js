@@ -45,8 +45,14 @@ const RestaurantCard = ({
     setLoading(true);
 
     try {
+      // Add response logging
       const response = await toggleSelectedRestaurant(id, userUid);
-      console.warn('Toggle response:', response);
+      console.warn('Server Response:', {
+        status: response.status,
+        data: response,
+        endpoint: `${process.env.NEXT_PUBLIC_DATABASE_URL}/selected_restaurants/toggle_selected_restaurant`,
+      });
+
       if (mountedRef.current) {
         setIsSelected(newValue);
         if (!newValue && onToggleOff) {
@@ -54,14 +60,20 @@ const RestaurantCard = ({
         }
       }
     } catch (error) {
-      console.error('Error toggling restaurant selection:', error);
+      // Enhanced error logging
+      console.error('Toggle Error Details:', {
+        status: error.response?.status,
+        message: error.message,
+        endpoint: `${process.env.NEXT_PUBLIC_DATABASE_URL}/selected_restaurants/toggle_selected_restaurant`,
+        userId: userUid,
+        restaurantId: id,
+      });
     } finally {
       if (mountedRef.current) {
         setLoading(false);
       }
     }
   }, [id, userUid, loading, onToggleOff]);
-
   const googleMapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${streetAddress}, ${city}, ${state} ${zipCode}`)}`;
 
   return (
